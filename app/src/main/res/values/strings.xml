@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">GO4LUNCH</string>
+    <string name="appTitleMain">I\'m hungry !</string>
+    <string name="go4lunch">Go4Lunch</string>
+    <string name="navigation_drawer_open">open navigation drawer</string>
+    <string name="navigation_drawer_close">close drawer navigation</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="map_view">Map view</string>
+    <string name="list_view">List View</string>
+    <string name="workmates">Workmates</string>
+</resources>

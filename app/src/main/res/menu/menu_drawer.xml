@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/yourlunch_item"
+            android:title="YOUR LUNCH"
+            android:icon="@drawable/lunch_icons"/>
+
+        <item
+            android:id="@+id/setting_item"
+            android:title="SETTINGS"
+            android:icon="@drawable/settings_icons"/>
+
+        <item
+            android:id="@+id/log_out_item"
+            android:title="LOGOUT"
+            android:icon="@drawable/logout_icons"/>
+    </group>
+
+</menu>
