@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "684996814163",
+    "project_id": "igneous-aleph-314907",
+    "storage_bucket": "igneous-aleph-314907.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:684996814163:android:4df85671c59802c357ada6",
+        "android_client_info": {
+          "package_name": "com.example.go4lunch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "684996814163-i1md5icf24bpg909vrda05cogm3p4ii4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFTIvMyLembyllUuLf_ELRhyBd_mQiocU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "684996814163-i1md5icf24bpg909vrda05cogm3p4ii4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

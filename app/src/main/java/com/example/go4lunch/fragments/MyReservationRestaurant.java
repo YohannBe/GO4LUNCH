@@ -11,15 +11,18 @@ import android.view.ViewGroup;
 import com.example.go4lunch.R;
 
 
-public class SettingFragment extends Fragment {
+public class MyReservationRestaurant extends Fragment {
 
-    public SettingFragment() {
+
+    public MyReservationRestaurant() {
         // Required empty public constructor
     }
 
-    public static SettingFragment newInstance (){
-        return (new SettingFragment());
+    public static MyReservationRestaurant newInstance (){
+        return (new MyReservationRestaurant());
     }
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -31,6 +34,6 @@ public class SettingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_setting, container, false);
+        return inflater.inflate(R.layout.fragment_my_reservation_restaurant, container, false);
     }
 }
