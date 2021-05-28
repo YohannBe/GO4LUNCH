@@ -12,6 +12,8 @@ import android.widget.Toast;
 import com.example.go4lunch.R;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 
 import java.util.Arrays;
 
@@ -57,5 +59,17 @@ public class LogIn extends AppCompatActivity {
             finish();
         } else
             Toast.makeText(this, "Operation cancelled", Toast.LENGTH_SHORT).show();
+    }
+
+    public void startSignInActivityFacebook(View view) {
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setAvailableProviders(
+                                Arrays.asList(
+                                        new AuthUI.IdpConfig.FacebookBuilder().build()))
+                        .setIsSmartLockEnabled(false, true)
+                        .build(),
+                RC_SIGN_IN);
     }
 }

@@ -15,4 +15,7 @@
     <color name="colorSecondary">#02ee64</color>
     <color name="colorSecondaryDark">#008500</color>
     <color name="colorSecondaryLight">#e2fde6</color>
+    <color name ="com_facebook_button_background_color_focused_disabled">#e2fde6</color>
+    <color name="com_facebook_button_background_color_focused">#e2fde6</color>
+    <color name="com_facebook_button_border_color_focused">#e2fde6</color>
 </resources>
