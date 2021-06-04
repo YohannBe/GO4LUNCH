@@ -15,7 +15,9 @@
     <color name="colorSecondary">#02ee64</color>
     <color name="colorSecondaryDark">#008500</color>
     <color name="colorSecondaryLight">#e2fde6</color>
-    <color name ="com_facebook_button_background_color_focused_disabled">#e2fde6</color>
-    <color name="com_facebook_button_background_color_focused">#e2fde6</color>
-    <color name="com_facebook_button_border_color_focused">#e2fde6</color>
+    <color name ="com_facebook_button_background_color_focused_disabled">#EDF0F5</color>
+    <color name="com_facebook_button_background_color_focused">#ADB9D3</color>
+    <color name="com_facebook_button_border_color_focused">#ADB9D3</color>
+    <color name="facebook_color_background">#3B5998</color>
+    <color name="google_background_color">#dd4b39</color>
 </resources>

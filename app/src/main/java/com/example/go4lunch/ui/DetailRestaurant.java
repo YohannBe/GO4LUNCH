@@ -7,7 +7,7 @@ import android.os.Bundle;
 
 import com.example.go4lunch.R;
 
-public class detailRestaurant extends AppCompatActivity {
+public class DetailRestaurant extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -8,13 +8,12 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.go4lunch.R;
@@ -24,14 +23,21 @@ import com.example.go4lunch.fragments.MyReservationRestaurant;
 import com.example.go4lunch.fragments.SettingFragment;
 import com.example.go4lunch.fragments.WorkmatesFragment;
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.bottomnavigation.BottomNavigationView.OnNavigationItemSelectedListener;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+import static com.example.go4lunch.api.UserHelper.COLLECTION_USER;
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SettingFragment.OnButtonClickedListener{
 
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
@@ -40,6 +46,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MainFragment mainFragment;
     private Fragment fragmentSetting;
     private Fragment fragmentReservation;
+
+    FirebaseFirestore firebaseFirestore;
 
 
 
@@ -50,17 +58,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        checkConnection();
         initElements();
     }
 
-    private void checkConnection() {
-        if(this.getCurrentUser() == null){
-            Intent toLogInActivity = new Intent(this, LogIn.class);
-            startActivity(toLogInActivity);
-            finish();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = this.getCurrentUser();
+        firebaseFirestore = FirebaseFirestore.getInstance();
+        checkConnection(currentUser);
+    }
+
+    private void checkConnection(FirebaseUser currentUser) {
+        if (GoogleSignIn.getLastSignedInAccount(this) == null) {
+            if (currentUser == null) {
+                toLogInActivity();
+            }
         }
+        if (currentUser != null){
+            firebaseFirestore.collection(COLLECTION_USER).document(currentUser.getUid()).get().addOnCompleteListener(task -> {
+                if (!task.getResult().exists()){
+                    Toast.makeText(MainActivity.this, currentUser.getUid(), Toast.LENGTH_SHORT).show();
+                    Intent toFirstEditActivity = new Intent(MainActivity.this, EditeProfile.class);
+                    toFirstEditActivity.putExtra("FIRST", true);
+                    startActivity(toFirstEditActivity);
+                } else
+                    Toast.makeText(MainActivity.this, currentUser.getUid(), Toast.LENGTH_SHORT).show();
+            });
+
+        }
+    }
+
+    private void toLogInActivity() {
+        Intent toLogInActivityIntent = new Intent(this, LogIn.class);
+        startActivity(toLogInActivityIntent);
+        finish();
     }
 
     private void initElements() {
@@ -172,12 +204,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private OnSuccessListener<? super Void> updateUiAfterRestRequestCompleted() {
-        return new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                checkConnection();
-            }
-        };
+        return (OnSuccessListener<Void>) aVoid -> checkConnection(getCurrentUser());
     }
 
 
@@ -232,4 +259,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected Boolean isCurrentUserLogged(){
         return (this.getCurrentUser() != null); }
 
+    protected OnFailureListener onFailureListener(){
+        return new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
+            }
+        };
+    }
+
+    @Override
+    public void onButtonClicked(View view) {
+        Intent toEditProfileActivity = new Intent(this, EditeProfile.class);
+        startActivity(toEditProfileActivity);
+    }
 }
