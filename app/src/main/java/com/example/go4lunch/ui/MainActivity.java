@@ -11,17 +11,21 @@ import androidx.fragment.app.Fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.api.UserHelper;
 import com.example.go4lunch.fragments.ListViewFragment;
 import com.example.go4lunch.fragments.MainFragment;
 import com.example.go4lunch.fragments.MyReservationRestaurant;
 import com.example.go4lunch.fragments.SettingFragment;
 import com.example.go4lunch.fragments.WorkmatesFragment;
+import com.example.go4lunch.model.User;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -37,7 +41,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import static com.example.go4lunch.api.UserHelper.COLLECTION_USER;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SettingFragment.OnButtonClickedListener{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SettingFragment.OnButtonClickedListener {
 
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
@@ -46,9 +50,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MainFragment mainFragment;
     private Fragment fragmentSetting;
     private Fragment fragmentReservation;
+    private TextView fullName, mail;
+
 
     FirebaseFirestore firebaseFirestore;
-
 
 
     private static final int FRAGMENT_SETTING = 0;
@@ -75,15 +80,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 toLogInActivity();
             }
         }
-        if (currentUser != null){
+        if (currentUser != null) {
             firebaseFirestore.collection(COLLECTION_USER).document(currentUser.getUid()).get().addOnCompleteListener(task -> {
-                if (!task.getResult().exists()){
+                if (!task.getResult().exists()) {
                     Toast.makeText(MainActivity.this, currentUser.getUid(), Toast.LENGTH_SHORT).show();
                     Intent toFirstEditActivity = new Intent(MainActivity.this, EditeProfile.class);
                     toFirstEditActivity.putExtra("FIRST", true);
                     startActivity(toFirstEditActivity);
-                } else
-                    Toast.makeText(MainActivity.this, currentUser.getUid(), Toast.LENGTH_SHORT).show();
+                } else {
+                    UserHelper.getUser(currentUser.getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            User myUser = documentSnapshot.toObject(User.class);
+                            String userFirstName = TextUtils.isEmpty(myUser.getFirstName()) ?
+                                    "First name not found" : myUser.getFirstName();
+                            String userLastName = TextUtils.isEmpty(myUser.getLastName()) ?
+                                    "Last name not found" : myUser.getLastName();
+                            fullName.setText(userFirstName + "  " + userLastName);
+                            mail.setText(getCurrentUser().getEmail());
+
+                        }
+                    });
+                }
             });
 
         }
@@ -102,6 +120,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.configureBottomBar();
 
         this.configureAndShowMainFragment();
+
+        View parentView = navigationView.getHeaderView(0);
+        fullName = parentView.findViewById(R.id.textview_firstname_drawer);
+        mail = parentView.findViewById(R.id.mail_drawernavigation_header);
+
+
     }
 
     private void configureDrawerLayout() {
@@ -122,14 +146,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
     }
 
-    private void configureBottomBar(){
+    private void configureBottomBar() {
         this.bottomNavigationView = findViewById(R.id.bottom_navigation);
         this.bottomNavigationView.setOnNavigationItemSelectedListener(navListener);
     }
 
-    private void configureAndShowMainFragment(){
+    private void configureAndShowMainFragment() {
         mainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.main_activity_frame_layout);
-        if(mainFragment==null){
+        if (mainFragment == null) {
             mainFragment = new MainFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.main_activity_frame_layout, mainFragment)
@@ -141,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Fragment selectedFragment = null;
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.page_1:
                 selectedFragment = new MainFragment();
                 break;
@@ -158,7 +182,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .commit();
         return true;
     };
-
 
 
     @Override
@@ -208,8 +231,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    private void showFragment(int fragmentIdentifier){
-        switch (fragmentIdentifier){
+    private void showFragment(int fragmentIdentifier) {
+        switch (fragmentIdentifier) {
             case FRAGMENT_RESERVATION:
                 this.showReservationFragment();
                 break;
@@ -222,26 +245,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    private void showSettingFragment(){
-        if(this.fragmentSetting == null)
+    private void showSettingFragment() {
+        if (this.fragmentSetting == null)
             this.fragmentSetting = SettingFragment.newInstance();
         this.startTransactionFragment(this.fragmentSetting);
     }
 
-    private void showReservationFragment(){
-        if(this.fragmentReservation == null)
+    private void showReservationFragment() {
+        if (this.fragmentReservation == null)
             this.fragmentReservation = MyReservationRestaurant.newInstance();
         this.startTransactionFragment(this.fragmentReservation);
     }
 
-    private void startTransactionFragment(Fragment fragment){
-        if (!fragment.isVisible()){
+    private void startTransactionFragment(Fragment fragment) {
+        if (!fragment.isVisible()) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_activity_frame_layout, fragment)
                     .commit();
         }
     }
-
 
 
     @Override
@@ -253,13 +275,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Nullable
-    protected FirebaseUser getCurrentUser(){
-        return FirebaseAuth.getInstance().getCurrentUser(); }
+    protected FirebaseUser getCurrentUser() {
+        return FirebaseAuth.getInstance().getCurrentUser();
+    }
 
-    protected Boolean isCurrentUserLogged(){
-        return (this.getCurrentUser() != null); }
+    protected Boolean isCurrentUserLogged() {
+        return (this.getCurrentUser() != null);
+    }
 
-    protected OnFailureListener onFailureListener(){
+    protected OnFailureListener onFailureListener() {
         return new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
@@ -271,6 +295,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onButtonClicked(View view) {
         Intent toEditProfileActivity = new Intent(this, EditeProfile.class);
+        toEditProfileActivity.putExtra("First", false);
         startActivity(toEditProfileActivity);
     }
 }

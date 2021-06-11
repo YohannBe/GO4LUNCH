@@ -29,14 +29,14 @@ public class UserHelper {
     }
 
     public static Task<Void> updateFirstName(String firstName, String uid){
-        return UserHelper.getUsersCollection().document(uid).update("first name", firstName);
+        return UserHelper.getUsersCollection().document(uid).update("firstName", firstName);
     }
     public static Task<Void> updateLastName(String lastName, String uid){
-        return UserHelper.getUsersCollection().document(uid).update("last name", lastName);
+        return UserHelper.getUsersCollection().document(uid).update("lastName", lastName);
     }
 
     public static Task<Void> updatePic(String urlPic, String uid){
-        return UserHelper.getUsersCollection().document(uid).update("picture", urlPic);
+        return UserHelper.getUsersCollection().document(uid).update("urlPicture", urlPic);
     }
 
     public static Task<Void> deleteUser(String uid){

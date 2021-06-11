@@ -30,6 +30,7 @@ public class User {
         this.lastName = lastName;
         this.urlPicture = urlPicture;
     }
+    public User(){}
 
     private String urlPicture;
 
