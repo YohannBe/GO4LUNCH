@@ -38,6 +38,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView5">
 
         <ImageView
+            android:id="@+id/imageview_header_drawer"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginStart="15dp"

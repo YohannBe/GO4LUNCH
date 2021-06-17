@@ -1,10 +1,19 @@
 package com.example.go4lunch.api;
 
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
+import com.example.go4lunch.model.Lunch;
 import com.example.go4lunch.model.User;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class UserHelper {
 
@@ -14,32 +23,41 @@ public class UserHelper {
         return FirebaseFirestore.getInstance().collection(COLLECTION_USER);
     }
 
-
-    public static Task<Void> createUser(String uid, String firstName, String lastName, String urlPicture) {
-        // 1 - Create User object
+    public Task<Void> createUser(String uid, String firstName, String lastName, String urlPicture) {
         User userToCreate = new User(uid, firstName, lastName, urlPicture);
-        // 2 - Add a new User Document to Firestore
         return UserHelper.getUsersCollection()
-                .document(uid) // Setting uID for Document
-                .set(userToCreate); // Setting object for Document
+                .document(uid)
+                .set(userToCreate);
     }
 
-    public static Task<DocumentSnapshot> getUser(String uid){
+    public Task<Void> createLunchUser(String uid, String restaurantId){
+
+        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        Lunch lunchToCreate = new Lunch(restaurantId, uid);
+        return UserHelper.getUsersCollection()
+                .document(uid)
+                .update(date, lunchToCreate);
+
+    }
+
+
+
+    public Task<DocumentSnapshot> getUser(String uid){
         return UserHelper.getUsersCollection().document(uid).get();
     }
 
-    public static Task<Void> updateFirstName(String firstName, String uid){
+    public Task<Void> updateFirstName(String firstName, String uid){
         return UserHelper.getUsersCollection().document(uid).update("firstName", firstName);
     }
-    public static Task<Void> updateLastName(String lastName, String uid){
+    public Task<Void> updateLastName(String lastName, String uid){
         return UserHelper.getUsersCollection().document(uid).update("lastName", lastName);
     }
 
-    public static Task<Void> updatePic(String urlPic, String uid){
+    public Task<Void> updatePic(String urlPic, String uid){
         return UserHelper.getUsersCollection().document(uid).update("urlPicture", urlPic);
     }
 
-    public static Task<Void> deleteUser(String uid){
+    public Task<Void> deleteUser(String uid){
         return UserHelper.getUsersCollection().document(uid).delete();
     }
 }

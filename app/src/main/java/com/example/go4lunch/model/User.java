@@ -1,10 +1,22 @@
 package com.example.go4lunch.model;
 
+import java.util.ArrayList;
+
 public class User {
 
     private String uid;
     private String firstName;
     private String lastName;
+    private String urlPicture;
+    private ArrayList<Lunch> lunchList;
+
+    public ArrayList<Lunch> getLunchList() {
+        return lunchList;
+    }
+
+    public void setLunchList(ArrayList<Lunch> lunchList) {
+        this.lunchList = lunchList;
+    }
 
     public String getUid() {
         return uid;
@@ -32,7 +44,7 @@ public class User {
     }
     public User(){}
 
-    private String urlPicture;
+
 
 
 

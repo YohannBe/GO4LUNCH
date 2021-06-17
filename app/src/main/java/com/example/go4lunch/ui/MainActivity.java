@@ -8,24 +8,32 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.R;
-import com.example.go4lunch.api.UserHelper;
 import com.example.go4lunch.fragments.ListViewFragment;
 import com.example.go4lunch.fragments.MainFragment;
 import com.example.go4lunch.fragments.MyReservationRestaurant;
 import com.example.go4lunch.fragments.SettingFragment;
 import com.example.go4lunch.fragments.WorkmatesFragment;
 import com.example.go4lunch.model.User;
+import com.example.go4lunch.myInterface.OnButtonClickedListener;
+import com.example.go4lunch.repository.RepositoryUser;
+import com.example.go4lunch.repository.RepositoryWorkmates;
+import com.example.go4lunch.viewmodel.ViewModelFactory;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -38,10 +46,18 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 import static com.example.go4lunch.api.UserHelper.COLLECTION_USER;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SettingFragment.OnButtonClickedListener {
+public class MainActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener, OnButtonClickedListener {
 
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
@@ -51,9 +67,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Fragment fragmentSetting;
     private Fragment fragmentReservation;
     private TextView fullName, mail;
-
-
-    FirebaseFirestore firebaseFirestore;
+    private FirebaseFirestore firebaseFirestore;
+    private RepositoryUser repositoryUser = new RepositoryUser();
+    RepositoryWorkmates repositoryWorkmates = new RepositoryWorkmates();
+    private Executor executor;
+    private UserViewModel userViewModel;
+    private ImageView picDrawer;
+    private ArrayList<String> list = new ArrayList<>();
+    private Bundle data = new Bundle();
 
 
     private static final int FRAGMENT_SETTING = 0;
@@ -63,7 +84,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        configureViewModel();
         initElements();
+    }
+
+    private void configureViewModel() {
+        FirebaseUser currentUser = this.getCurrentUser();
+        ViewModelFactory mViewModelFactory = new ViewModelFactory(repositoryUser, repositoryWorkmates, executor);
+        this.userViewModel = ViewModelProviders.of(this, mViewModelFactory).get(UserViewModel.class);
+
     }
 
     @Override
@@ -83,12 +112,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (currentUser != null) {
             firebaseFirestore.collection(COLLECTION_USER).document(currentUser.getUid()).get().addOnCompleteListener(task -> {
                 if (!task.getResult().exists()) {
-                    Toast.makeText(MainActivity.this, currentUser.getUid(), Toast.LENGTH_SHORT).show();
                     Intent toFirstEditActivity = new Intent(MainActivity.this, EditeProfile.class);
                     toFirstEditActivity.putExtra("FIRST", true);
                     startActivity(toFirstEditActivity);
                 } else {
-                    UserHelper.getUser(currentUser.getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    this.userViewModel.getUser(currentUser.getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             User myUser = documentSnapshot.toObject(User.class);
@@ -98,6 +126,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     "Last name not found" : myUser.getLastName();
                             fullName.setText(userFirstName + "  " + userLastName);
                             mail.setText(getCurrentUser().getEmail());
+
+                            if (myUser.getUrlPicture() != "" && myUser.getUrlPicture() != null) {
+                                FirebaseStorage.getInstance().getReference(myUser.getUrlPicture()).getDownloadUrl()
+                                        .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                            @Override
+                                            public void onSuccess(Uri uri) {
+                                                Glide.with(MainActivity.this)
+                                                        .load(uri)
+                                                        .apply(RequestOptions.circleCropTransform())
+                                                        .into(picDrawer);
+                                            }
+                                        });
+                            }
 
                         }
                     });
@@ -124,6 +165,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         View parentView = navigationView.getHeaderView(0);
         fullName = parentView.findViewById(R.id.textview_firstname_drawer);
         mail = parentView.findViewById(R.id.mail_drawernavigation_header);
+        picDrawer = parentView.findViewById(R.id.imageview_header_drawer);
 
 
     }
@@ -174,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.page_3:
                 selectedFragment = new WorkmatesFragment();
+
                 break;
         }
 
@@ -297,5 +340,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Intent toEditProfileActivity = new Intent(this, EditeProfile.class);
         toEditProfileActivity.putExtra("First", false);
         startActivity(toEditProfileActivity);
+    }
+
+    @Override
+    public void onButtonClickedReservation(View v) {
+        this.userViewModel.createLunch(getCurrentUser().getUid(), "abcdefg");
     }
 }

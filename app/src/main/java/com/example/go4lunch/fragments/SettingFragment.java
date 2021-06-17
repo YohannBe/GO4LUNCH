@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.myInterface.OnButtonClickedListener;
 
 
 public class SettingFragment extends Fragment implements View.OnClickListener {
@@ -18,9 +19,7 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
     private Button editProfile;
     private OnButtonClickedListener mCallback;
 
-    public interface OnButtonClickedListener {
-        public void onButtonClicked(View view);
-    }
+
 
     public SettingFragment() {
         // Required empty public constructor
