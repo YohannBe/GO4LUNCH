@@ -201,11 +201,7 @@ public class EditeProfile extends AppCompatActivity {
         StorageReference mImageRef = FirebaseStorage.getInstance().getReference(uuid);
 
         mImageRef.putFile(this.uriImageSelected)
-                .addOnSuccessListener(EditeProfile.this, taskSnapshot -> {
-                    String pathImageSavedInFirebase = taskSnapshot.getMetadata()
-                            .getReference().getDownloadUrl()
-                            .getResult().toString();
-                }).addOnFailureListener(new OnFailureListener() {
+                .addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 this.onFailure(e);

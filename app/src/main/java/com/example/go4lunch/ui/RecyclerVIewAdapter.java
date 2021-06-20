@@ -23,15 +23,24 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RecyclerVIewAdapter extends RecyclerView.Adapter<RecyclerVIewAdapter.ViewHolder> {
 
-    private ArrayList<User> workerList;
     private Context context;
+    private List<User> userList = new ArrayList<>();
 
-    public RecyclerVIewAdapter(ArrayList<User> workerList, Context context) {
-        this.workerList = workerList;
+    @NonNull
+    private final UpdateWorkmatesListener updateWorkmatesListener;
+
+    public RecyclerVIewAdapter(Context context, final UpdateWorkmatesListener updateWorkmatesListener) {
         this.context = context;
+        this.updateWorkmatesListener = updateWorkmatesListener;
+    }
+
+    public void updateWorkmateList(List<User> userList) {
+        this.userList = userList;
+        notifyDataSetChanged();
     }
 
     /**
@@ -41,38 +50,41 @@ public class RecyclerVIewAdapter extends RecyclerView.Adapter<RecyclerVIewAdapte
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_layout, parent, false);
-        ViewHolder holder = new ViewHolder(view);
+        ViewHolder holder = new ViewHolder(view, updateWorkmatesListener);
         return holder;
+    }
+
+    public interface UpdateWorkmatesListener {
+        void onUpdateWorkmate(User user);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Log.d("bindview", "bindview called");
-
-        if ( workerList.get(position).getUrlPicture() != null) {
-            FirebaseStorage.getInstance().getReference(workerList.get(position).getUrlPicture()).getDownloadUrl()
-                    .addOnSuccessListener(uri -> Glide.with(context)
-                            .load(uri)
-                            .apply(RequestOptions.circleCropTransform())
-                            .into(holder.imageView));
-        }
-        holder.textView.setText(workerList.get(position).getFirstName() + " " + workerList.get(position).getLastName());
-
-        holder.parentLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(context, workerList.get(position).getFirstName(), Toast.LENGTH_SHORT).show();
+        if (context !=null) {
+            if (userList.get(position).getUrlPicture() != null) {
+                FirebaseStorage.getInstance().getReference(userList.get(position).getUrlPicture()).getDownloadUrl()
+                        .addOnSuccessListener(uri -> Glide.with(context)
+                                .load(uri)
+                                .apply(RequestOptions.circleCropTransform())
+                                .into(holder.imageView));
             }
-        });
+        }
+        String sentence = userList.get(position).getFirstName() + " " + userList.get(position).getLastName();
+        holder.textView.setText(sentence);
+
+        holder.parentLayout.setOnClickListener(v ->
+                Toast.makeText(context, userList.get(position).getFirstName(), Toast.LENGTH_SHORT).show());
     }
 
     @Override
     public int getItemCount() {
-        if (workerList == null)
+        if (userList == null)
             return 0;
         else
-            return workerList.size();
+            return userList.size();
     }
+
+
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -80,7 +92,7 @@ public class RecyclerVIewAdapter extends RecyclerView.Adapter<RecyclerVIewAdapte
         TextView textView;
         ConstraintLayout parentLayout;
 
-        public ViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView, UpdateWorkmatesListener updateWorkmatesListener) {
             super(itemView);
 
             imageView = itemView.findViewById(R.id.imageView_workmates);

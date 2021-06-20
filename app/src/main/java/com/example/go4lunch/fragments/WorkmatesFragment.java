@@ -1,39 +1,52 @@
 package com.example.go4lunch.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.model.Lunch;
 import com.example.go4lunch.model.User;
 import com.example.go4lunch.ui.RecyclerVIewAdapter;
 import com.example.go4lunch.ui.UserViewModel;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
+import java.time.chrono.JapaneseDate;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 
-public class WorkmatesFragment extends Fragment {
+public class WorkmatesFragment extends Fragment implements  RecyclerVIewAdapter.UpdateWorkmatesListener{
     RecyclerView recyclerView;
-    private ArrayList<User> workerList = new ArrayList<>();
-    private List<String> list = new ArrayList<>();
+
     private UserViewModel userViewModel;
-    private ArrayList<String> mNames = new ArrayList<>();
-    private ArrayList<String> mPicturesUrl = new ArrayList<>();
+    private RecyclerVIewAdapter adapter;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+         adapter = new RecyclerVIewAdapter(getContext(), this);
+    }
+
 
 
 
     public WorkmatesFragment() {
-        // Required empty public constructor
     }
 
 
@@ -59,26 +72,20 @@ public class WorkmatesFragment extends Fragment {
 
 
         userViewModel = ViewModelProviders.of(getActivity()).get(UserViewModel.class);
+        userViewModel.getAllUsers().observe(this, this:: getAllUsers);
         recyclerView = view.findViewById(R.id.recyclerview_widget_list);
-        RecyclerVIewAdapter adapter = new RecyclerVIewAdapter(workerList, getContext());
+
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+    }
 
-        userViewModel.getWorkmatesLunch().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
+    private void getAllUsers(List<User> userList) {
+        adapter.updateWorkmateList(userList);
+    }
 
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    this.list.add(document.getId());
-                }
-                for (int i = 0; i < list.size(); i++) {
-                    userViewModel.getUser(list.get(i)).addOnSuccessListener(documentSnapshot -> {
-                        User specUser = documentSnapshot.toObject(User.class);
-                        workerList.add(specUser);
-                        adapter.notifyDataSetChanged();
-                    });
-                }
-            }
-        });
+    @Override
+    public void onUpdateWorkmate(User user) {
+
     }
 }
