@@ -77,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements
     int tag = 0;
 
 
-
     private static final int FRAGMENT_SETTING = 0;
     private static final int FRAGMENT_RESERVATION = 1;
 
@@ -106,12 +105,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void checkConnection(FirebaseUser currentUser) {
-        if (GoogleSignIn.getLastSignedInAccount(this) == null) {
-            if (currentUser == null) {
-                toLogInActivity();
-            }
-        }
-        if (currentUser != null) {
+
+        if (currentUser == null) {
+            toLogInActivity();
+        } else {
             firebaseFirestore.collection(COLLECTION_USER).document(currentUser.getUid()).get().addOnCompleteListener(task -> {
                 if (!task.getResult().exists()) {
                     Intent toFirstEditActivity = new Intent(MainActivity.this, EditeProfile.class);
@@ -141,12 +138,10 @@ public class MainActivity extends AppCompatActivity implements
                                             }
                                         });
                             }
-
                         }
                     });
                 }
             });
-
         }
     }
 

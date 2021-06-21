@@ -9,8 +9,8 @@
     <string name="map_view">Map view</string>
     <string name="list_view">List View</string>
     <string name="workmates">Workmates</string>
-    <string name="facebook_app_id">475063977092694</string>
-    <string name="fb_login_protocol_scheme">fb475063977092694</string>
+    <string name="facebook_application_id" translatable="false">475063977092694</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb475063977092694</string>
     <string name="title_activity_edit_profile">EditProfile</string>
     <!--
     This string is used for square devices and overridden by hello_world in
