@@ -1,9 +1,5 @@
 package com.example.go4lunch.ui;
 
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 

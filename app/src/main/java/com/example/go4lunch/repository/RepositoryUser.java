@@ -1,12 +1,7 @@
 package com.example.go4lunch.repository;
 
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
-
 import com.example.go4lunch.api.UserHelper;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 public class RepositoryUser {

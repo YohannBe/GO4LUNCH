@@ -1,5 +1,6 @@
 package com.example.go4lunch.model;
 
+
 import java.util.ArrayList;
 
 public class User {
@@ -9,6 +10,8 @@ public class User {
     private String lastName;
     private String urlPicture;
     private ArrayList<Lunch> lunchList;
+    private Lunch lunch;
+
 
     public ArrayList<Lunch> getLunchList() {
         return lunchList;

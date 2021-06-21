@@ -73,8 +73,9 @@ public class MainActivity extends AppCompatActivity implements
     private Executor executor;
     private UserViewModel userViewModel;
     private ImageView picDrawer;
-    private ArrayList<String> list = new ArrayList<>();
-    private Bundle data = new Bundle();
+    Fragment selectedFragment = null;
+    int tag = 0;
+
 
 
     private static final int FRAGMENT_SETTING = 0;
@@ -85,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         configureViewModel();
+
         initElements();
     }
 
@@ -194,35 +196,60 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void configureAndShowMainFragment() {
-        mainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.main_activity_frame_layout);
-        if (mainFragment == null) {
+
+        if (tag == 0) {
             mainFragment = new MainFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.main_activity_frame_layout, mainFragment)
                     .commit();
+        } else {
+            switch (tag) {
+                case 1:
+                    selectedFragment = new MainFragment();
+                    break;
+                case 2:
+                    selectedFragment = new ListViewFragment();
+                    break;
+                case 3:
+                    selectedFragment = new WorkmatesFragment();
+                    break;
+            }
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main_activity_frame_layout, selectedFragment)
+                    .commit();
         }
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+
+        outState.putInt("selected_fragment", tag);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        tag = savedInstanceState.getInt("selected_fragment");
+        configureAndShowMainFragment();
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener = item -> {
 
-        Fragment selectedFragment = null;
-
         switch (item.getItemId()) {
             case R.id.page_1:
-                selectedFragment = new MainFragment();
+                tag = 1;
                 break;
             case R.id.page_2:
-                selectedFragment = new ListViewFragment();
+                tag = 2;
                 break;
             case R.id.page_3:
-                selectedFragment = new WorkmatesFragment();
-
+                tag = 3;
                 break;
         }
 
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main_activity_frame_layout, selectedFragment)
-                .commit();
+        configureAndShowMainFragment();
         return true;
     };
 

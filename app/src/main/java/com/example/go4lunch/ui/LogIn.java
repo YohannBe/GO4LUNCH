@@ -11,7 +11,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.go4lunch.BuildConfig;
 import com.example.go4lunch.R;
+import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.facebook.FacebookSdk;
@@ -49,7 +51,7 @@ public class LogIn extends AppCompatActivity {
 
     private void initGoogleConnexion() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("AIzaSyDFTIvMyLembyllUuLf_ELRhyBd_mQiocU")
+                .requestIdToken(BuildConfig.API_KEY_FIREBASE)
                 .requestEmail()
                 .build();
         GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, gso);

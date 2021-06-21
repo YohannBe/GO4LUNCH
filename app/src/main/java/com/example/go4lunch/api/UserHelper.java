@@ -1,8 +1,6 @@
 package com.example.go4lunch.api;
 
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
+import android.net.Uri;
 
 import com.example.go4lunch.model.Lunch;
 import com.example.go4lunch.model.User;
@@ -39,7 +37,6 @@ public class UserHelper {
                 .update(date, lunchToCreate);
 
     }
-
 
 
     public Task<DocumentSnapshot> getUser(String uid){
