@@ -14,15 +14,21 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.go4lunch.BuildConfig;
 import com.example.go4lunch.R;
 import com.example.go4lunch.fragments.ListViewFragment;
 import com.example.go4lunch.fragments.MainFragment;
@@ -36,10 +42,21 @@ import com.example.go4lunch.repository.RepositoryWorkmates;
 import com.example.go4lunch.viewmodel.ViewModelFactory;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,6 +68,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -69,12 +87,15 @@ public class MainActivity extends AppCompatActivity implements
     private TextView fullName, mail;
     private FirebaseFirestore firebaseFirestore;
     private RepositoryUser repositoryUser = new RepositoryUser();
-    RepositoryWorkmates repositoryWorkmates = new RepositoryWorkmates();
+    private RepositoryWorkmates repositoryWorkmates = new RepositoryWorkmates();
     private Executor executor;
     private UserViewModel userViewModel;
     private ImageView picDrawer;
     Fragment selectedFragment = null;
     int tag = 0;
+    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(new LatLng(-40,-168),
+            new LatLng(71, 136));
+    private static int AUTOCOMPLETE_REQUEST_CODE = 1;
 
 
     private static final int FRAGMENT_SETTING = 0;
@@ -163,7 +184,14 @@ public class MainActivity extends AppCompatActivity implements
         fullName = parentView.findViewById(R.id.textview_firstname_drawer);
         mail = parentView.findViewById(R.id.mail_drawernavigation_header);
         picDrawer = parentView.findViewById(R.id.imageview_header_drawer);
+        initSearch();
 
+    }
+
+    private void initSearch(){
+        Places.initialize(getApplicationContext(), BuildConfig.MAPS_API_KEY);
+
+        PlacesClient placesClient = Places.createClient(this);
 
     }
 
@@ -259,12 +287,31 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_search:
-                Toast.makeText(this, "nothing yet", Toast.LENGTH_SHORT)
-                        .show();
+
+                List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+                Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
+                        .build(this);
+                startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Place place = Autocomplete.getPlaceFromIntent(data);
+            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                // TODO: Handle the error.
+                Status status = Autocomplete.getStatusFromIntent(data);
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+            }
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
