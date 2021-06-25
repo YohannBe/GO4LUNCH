@@ -81,6 +81,7 @@ public class WorkmatesFragment extends Fragment implements  RecyclerVIewAdapter.
     }
 
     private void getAllUsers(List<User> userList) {
+        userList = userViewModel.updateListUserSort(userList);
         adapter.updateWorkmateList(userList);
     }
 

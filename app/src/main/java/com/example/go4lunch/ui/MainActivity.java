@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -14,15 +15,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,16 +38,11 @@ import com.example.go4lunch.repository.RepositoryUser;
 import com.example.go4lunch.repository.RepositoryWorkmates;
 import com.example.go4lunch.viewmodel.ViewModelFactory;
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -63,11 +55,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -93,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements
     private ImageView picDrawer;
     Fragment selectedFragment = null;
     int tag = 0;
-    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(new LatLng(-40,-168),
+    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(new LatLng(-40, -168),
             new LatLng(71, 136));
     private static int AUTOCOMPLETE_REQUEST_CODE = 1;
 
@@ -188,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
-    private void initSearch(){
+    private void initSearch() {
         Places.initialize(getApplicationContext(), BuildConfig.MAPS_API_KEY);
 
         PlacesClient placesClient = Places.createClient(this);
@@ -412,7 +401,11 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onButtonClickedReservation(View v) {
-        this.userViewModel.createLunch(getCurrentUser().getUid(), "abcdefg");
+    public void onButtonClickedReservation(View v, ScrollView container, TextView nothingText) {
+       this.userViewModel.deleteLunch(getCurrentUser().getUid());
+       v.setEnabled(false);
+       v.setBackgroundColor(ContextCompat.getColor(this,R.color.colorAccentLighter));
+       container.setVisibility(View.GONE);
+       nothingText.setVisibility(View.VISIBLE);
     }
 }

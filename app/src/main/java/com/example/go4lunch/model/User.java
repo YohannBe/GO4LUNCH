@@ -2,6 +2,8 @@ package com.example.go4lunch.model;
 
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Map;
 
 public class User {
 
@@ -9,17 +11,34 @@ public class User {
     private String firstName;
     private String lastName;
     private String urlPicture;
-    private ArrayList<Lunch> lunchList;
     private Lunch lunch;
+    private Map<String, Lunch> dateLunch;
+    private ArrayList<String> favorite;
 
-
-    public ArrayList<Lunch> getLunchList() {
-        return lunchList;
+    public ArrayList<String> getFavorite() {
+        return favorite;
     }
 
-    public void setLunchList(ArrayList<Lunch> lunchList) {
-        this.lunchList = lunchList;
+    public void setFavorite(ArrayList<String> favorite) {
+        this.favorite = favorite;
     }
+
+    public Lunch getLunch() {
+        return lunch;
+    }
+
+    public void setLunch(Lunch lunch) {
+        this.lunch = lunch;
+    }
+
+    public Map<String, Lunch> getDateLunch() {
+        return dateLunch;
+    }
+
+    public void setDateLunch(Map<String, Lunch> dateLunch) {
+        this.dateLunch = dateLunch;
+    }
+
 
     public String getUid() {
         return uid;
@@ -47,7 +66,12 @@ public class User {
     }
     public User(){}
 
-
+    public static class nameAZComparator implements Comparator<User> {
+        @Override
+        public int compare(User left, User right) {
+            return left.firstName.compareTo(right.firstName);
+        }
+    }
 
 
 

@@ -7,11 +7,29 @@ import java.util.Date;
 public class Lunch {
 
     private Date timestamp;
-    private String restaurantId, userId;
+    private String restaurantId, userId, restaurantName, restaurantType;
 
-    public Lunch(String restaurantId, String userId) {
+    public String getRestaurantName() {
+        return restaurantName;
+    }
+
+    public void setRestaurantName(String restaurantName) {
+        this.restaurantName = restaurantName;
+    }
+
+    public String getRestaurantType() {
+        return restaurantType;
+    }
+
+    public void setRestaurantType(String restaurantType) {
+        this.restaurantType = restaurantType;
+    }
+
+    public Lunch(String restaurantId, String userId, String restaurantName, String restaurantType) {
         this.restaurantId = restaurantId;
+        this.restaurantName = restaurantName;
         this.userId = userId;
+        this.restaurantType = restaurantType;
     }
 
     public Lunch() {

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/user_recyclerview_layout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
 
     <ImageView
         android:id="@+id/imageView_workmates"
@@ -13,19 +14,20 @@
         android:layout_height="50dp"
         android:layout_marginStart="10dp"
         android:src="@drawable/mycircle"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+
+        />
 
     <TextView
         android:id="@+id/textview_destination_users"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:textSize="17sp"
         android:text="machin is eating french (Le zinc)"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageView_workmates"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textSize="17sp"
+        android:textColor="@color/black"
+        android:paddingHorizontal="10dp"
+        android:autoSizeTextType="uniform"
+        android:layout_gravity="center_vertical"
+        />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

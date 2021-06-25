@@ -2,10 +2,12 @@ package com.example.go4lunch.ui;
 
 import android.content.Context;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,13 +21,17 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.model.User;
 import com.google.firebase.storage.FirebaseStorage;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class RecyclerVIewAdapter extends RecyclerView.Adapter<RecyclerVIewAdapter.ViewHolder> {
 
     private Context context;
     private List<User> userList = new ArrayList<>();
+    private String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
     @NonNull
     private final UpdateWorkmatesListener updateWorkmatesListener;
@@ -57,20 +63,41 @@ public class RecyclerVIewAdapter extends RecyclerView.Adapter<RecyclerVIewAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        if (context !=null) {
+        if (context != null) {
             if (userList.get(position).getUrlPicture() != null) {
-                FirebaseStorage.getInstance().getReference(userList.get(position).getUrlPicture()).getDownloadUrl()
+                String emplacement = userList.get(position).getUrlPicture();
+                FirebaseStorage.getInstance().getReference(emplacement).getDownloadUrl()
                         .addOnSuccessListener(uri -> Glide.with(context)
                                 .load(uri)
                                 .apply(RequestOptions.circleCropTransform())
                                 .into(holder.imageView));
+            } else {
+                Glide.with(context)
+                        .load(R.drawable.person_icons)
+                        .apply(RequestOptions.circleCropTransform())
+                        .into(holder.imageView);
             }
         }
-        String sentence = userList.get(position).getFirstName() + " " + userList.get(position).getLastName();
+        String sentence = userList.get(position).getFirstName();
+
+        if(userList.get(position).getDateLunch() != null){
+            if (userList.get(position).getDateLunch().get(date) != null){
+                if (userList.get(position).getDateLunch().get(date).getRestaurantName() != null)
+                    sentence = sentence +
+                            " is going to "+ userList.get(position).getDateLunch().get(date).getRestaurantName();
+            }
+        } else {
+            sentence = sentence + " has not decided yet";
+            holder.textView.setTextColor(Color.parseColor("#808080"));
+        }
         holder.textView.setText(sentence);
 
         holder.parentLayout.setOnClickListener(v ->
-                Toast.makeText(context, userList.get(position).getFirstName(), Toast.LENGTH_SHORT).show());
+                {
+                    Toast.makeText(context, userList.get(position).getFirstName(), Toast.LENGTH_SHORT).show();
+                }
+        );
+
     }
 
     @Override
@@ -82,12 +109,11 @@ public class RecyclerVIewAdapter extends RecyclerView.Adapter<RecyclerVIewAdapte
     }
 
 
-
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imageView;
         TextView textView;
-        ConstraintLayout parentLayout;
+        LinearLayout parentLayout;
 
         public ViewHolder(@NonNull View itemView, UpdateWorkmatesListener updateWorkmatesListener) {
             super(itemView);

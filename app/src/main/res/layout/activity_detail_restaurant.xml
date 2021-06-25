@@ -89,7 +89,7 @@
                     />
 
                 <TextView
-                    android:id="@+id/address_restaurant_detail"
+                    android:id="@+id/address_restaurant"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -143,6 +143,21 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/floatingActionButton_detail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="@color/white"
+                android:clickable="true"
+                android:onClick="addRestaurantLunch"
+                app:layout_constraintBottom_toBottomOf="@+id/recyclerview_restaurant"
+                app:layout_constraintEnd_toEndOf="parent"
+
+                app:layout_constraintTop_toTopOf="@+id/imageview_pic_restaurant"
+                app:layout_constraintVertical_bias="0.392"
+                app:srcCompat="@drawable/choose_restaurant_icons" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
