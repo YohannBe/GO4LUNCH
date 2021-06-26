@@ -46,10 +46,6 @@ public class RepositoryUser {
         userHelper.deleteReservation(uid);
     }
 
-    public Task<QuerySnapshot> getLunchIfExist(String uid, String restaurantId){
-        return userHelper.getLunchIfExist(uid, restaurantId);
-    }
-
     public void createFavoriteList(String uid, String restaurantId){
         userHelper.createFavoriteList(uid, restaurantId);
     }

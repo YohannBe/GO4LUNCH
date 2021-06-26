@@ -105,12 +105,6 @@ public class UserHelper {
         });
     }
 
-    public Task<QuerySnapshot> getLunchIfExist(String uid, String restaurantId) {
-        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        return UserHelper.getUsersCollection().whereArrayContains("dateLunch." + date + ".restaurantId", restaurantId).get();
-    }
-
-
     public Task<DocumentSnapshot> getUser(String uid) {
         return UserHelper.getUsersCollection().document(uid).get();
     }

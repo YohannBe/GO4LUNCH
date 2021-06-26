@@ -68,6 +68,7 @@
             android:layout_gravity="center_horizontal"
             android:text="Sign in with mail"
             android:textAllCaps="false"
+            android:textColor="@color/black"
             android:drawableStart="@drawable/mail_icons"/>
     </androidx.cardview.widget.CardView>
 

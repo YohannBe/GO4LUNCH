@@ -173,10 +173,19 @@ public class MyReservationRestaurant extends Fragment implements View.OnClickLis
             final FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
                     .build();
 
-            price = place.getPriceLevel();
-            rating = place.getRating();
+            if (place.getPriceLevel() != null)
+                price = place.getPriceLevel();
+            else price = 0;
+            if (place.getRating() != null)
+                rating = place.getRating();
+            else rating = 0;
 
             switch (price) {
+                case 0:
+                    price3.setVisibility(View.GONE);
+                    price2.setVisibility(View.GONE);
+                    price1.setVisibility(View.GONE);
+                    break;
                 case 1:
                     price3.setVisibility(View.GONE);
                     price2.setVisibility(View.GONE);
@@ -188,11 +197,16 @@ public class MyReservationRestaurant extends Fragment implements View.OnClickLis
                     break;
             }
 
-            if (0 <= rating && rating < 1.6) {
+            if (0 < rating && rating < 1.6) {
                 star3.setVisibility(View.GONE);
                 star2.setVisibility(View.GONE);
-            } else if (rating < 3.2)
+            } else if (rating < 3.2) {
                 star3.setVisibility(View.GONE);
+            } else if (rating == 0){
+                star3.setVisibility(View.GONE);
+                star2.setVisibility(View.GONE);
+                star1.setVisibility(View.GONE);
+            }
 
             placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
                 Bitmap bitmap = fetchPhotoResponse.getBitmap();
@@ -205,9 +219,16 @@ public class MyReservationRestaurant extends Fragment implements View.OnClickLis
                 }
             });
 
-            restaurantName.setText(place.getName());
-            restaurantAddress.setText(place.getAddress());
-            String phone = "tel:" + place.getPhoneNumber();
+            if (place.getName() != null)
+                restaurantName.setText(place.getName());
+
+            if (place.getAddress() != null)
+                restaurantAddress.setText(place.getAddress());
+            String phone;
+            if (place.getPhoneNumber() != null)
+                phone = "tel:" + place.getPhoneNumber();
+            else
+                phone = null;
             initListeners(phone, place.getWebsiteUri());
         }).addOnFailureListener((exception) -> {
             if (exception instanceof ApiException) {
@@ -222,14 +243,16 @@ public class MyReservationRestaurant extends Fragment implements View.OnClickLis
 
     private void initListeners(String phoneNumber, Uri websiteUri) {
         callButton.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_DIAL);
-            intent.setData(Uri.parse(phoneNumber));
-            startActivity(intent);
+            if (phoneNumber != null) {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse(phoneNumber));
+                startActivity(intent);
+            } else Toast.makeText(getActivity(), "It seems that there is no number phone yet", Toast.LENGTH_SHORT).show();
         });
 
         website.setOnClickListener(v -> {
             if (websiteUri == null || websiteUri.toString() == "") {
-                Toast.makeText(getActivity(), websiteUri.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "It seems that there is no website yet", Toast.LENGTH_SHORT).show();
             } else {
                 Intent intentWeb = new Intent(Intent.ACTION_VIEW).setData(websiteUri);
                 startActivity(intentWeb);

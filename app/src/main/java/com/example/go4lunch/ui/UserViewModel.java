@@ -174,24 +174,6 @@ public class UserViewModel extends ViewModel {
         userDataSource.deleteLunch(uid);
     }
 
-    public Task<QuerySnapshot> getLunchIfExist(String uid, String restaurantId) {
-        return userDataSource.getLunchIfExist(uid, restaurantId);
-    }
-
-    public MutableLiveData<List<String>> allUsersCheckedInSpecRestaurant = new MutableLiveData<>();
-
-    public MutableLiveData<List<String>> getAlreadyCheckedRestaurant(String uid, String restaurantId) {
-        List<String> list = new ArrayList<>();
-        this.getLunchIfExist(uid, restaurantId).addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                for (int i = 0; i < queryDocumentSnapshots.size(); i++) {
-                    list.add(queryDocumentSnapshots.getDocuments().get(i).getId());
-                }
-            }
-        });
-        return allUsersCheckedInSpecRestaurant;
-    }
 
     public List<User> updateListUserSort(List<User> originalList) {
         originalList.sort(new User.nameAZComparator());

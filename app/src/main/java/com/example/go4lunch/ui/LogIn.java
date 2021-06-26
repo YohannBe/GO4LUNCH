@@ -22,7 +22,6 @@ public class LogIn extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_log_in);
 
         this.startSignInActivity();
     }
@@ -38,9 +37,9 @@ public class LogIn extends AppCompatActivity {
                                         new AuthUI.IdpConfig.FacebookBuilder().build()))
                         .setIsSmartLockEnabled(false, true)
                         .setAuthMethodPickerLayout(getCustomAuthLayout())
-                        .setTheme(R.style.Theme_AppCompat_Light_NoActionBar)
                         .build(),
                 RC_SIGN_IN);
+        finish();
     }
 
     @Override

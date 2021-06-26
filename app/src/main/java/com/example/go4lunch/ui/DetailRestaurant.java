@@ -55,7 +55,7 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
     private RepositoryWorkmates repositoryWorkmates = new RepositoryWorkmates();
     private Executor executor;
     private String response = null;
-    private boolean checked = false, favorite =false;
+    private boolean checked = false, favorite = false;
     private Lunch lunch;
     private String restaurantName = null, restaurantType = null;
     private FloatingActionButton addLunchButton;
@@ -106,11 +106,11 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
 
     private void getMyUser(User user) {
         currentUser = user;
-        if (currentUser.getDateLunch() != null){
+        if (currentUser.getDateLunch() != null) {
             String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-            if (currentUser.getDateLunch().get(date) != null){
-                if (currentUser.getDateLunch().get(date).getRestaurantId() != null){
-                    if (currentUser.getDateLunch().get(date).getRestaurantId().equals(response)){
+            if (currentUser.getDateLunch().get(date) != null) {
+                if (currentUser.getDateLunch().get(date).getRestaurantId() != null) {
+                    if (currentUser.getDateLunch().get(date).getRestaurantId().equals(response)) {
                         checked = true;
                         updateFloatingButton();
                     }
@@ -166,22 +166,36 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
                 }
             });
 
-            rating = place.getRating();
+            if (place.getRating() != null)
+                rating = place.getRating();
+            else {
+                rating = 0;
+            }
 
-            if (0 <= rating && rating < 1.6) {
+            if (0 < rating && rating < 1.6) {
                 star3.setVisibility(View.GONE);
                 star2.setVisibility(View.GONE);
-            } else if (rating < 3.2)
+            } else if (rating < 3.2) {
                 star3.setVisibility(View.GONE);
+            } else if (rating == 0){
+                star3.setVisibility(View.GONE);
+                star2.setVisibility(View.GONE);
+                star1.setVisibility(View.GONE);
+            }
 
+            if (place.getName() != null)
+                name.setText(place.getName());
+            if (place.getAddress() != null)
+                address.setText(place.getAddress());
 
-            Toast.makeText(this, String.valueOf(rating), Toast.LENGTH_SHORT).show();
-
-            name.setText(place.getName());
             restaurantName = place.getName();
+
             restaurantType = place.getTypes().get(0).toString();
-            address.setText(place.getAddress());
-            String phone = "tel:" + place.getPhoneNumber();
+            String phone;
+            if (place.getPhoneNumber() != null)
+                phone = "tel:" + place.getPhoneNumber();
+            else
+                phone = null;
             initListeners(phone, place.getWebsiteUri());
         }).addOnFailureListener((exception) -> {
             if (exception instanceof ApiException) {
@@ -195,37 +209,34 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
 
     private void initListeners(String phoneNumber, Uri websiteUri) {
         callButton.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_DIAL);
-            intent.setData(Uri.parse(phoneNumber));
-            startActivity(intent);
-
+            if (phoneNumber != null) {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse(phoneNumber));
+                startActivity(intent);
+            } else
+                Toast.makeText(this, "It seems that there is no number phone yet", Toast.LENGTH_SHORT).show();
         });
-
 
         website.setOnClickListener(v -> {
             if (websiteUri == null || websiteUri.toString() == "") {
-                Toast.makeText(DetailRestaurant.this, websiteUri.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "It seems that there is no website yet", Toast.LENGTH_SHORT).show();
             } else {
                 Intent intentWeb = new Intent(Intent.ACTION_VIEW).setData(websiteUri);
                 startActivity(intentWeb);
             }
         });
 
-        mLike.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!favorite) {
-                    favorite = true;
-                    updateUiFavorite();
-                    userViewModel.createFavoriteList(getCurrentUser().getUid(), response);
-                } else {
-                    favorite = false;
-                    updateUiFavorite();
-                    userViewModel.deleteFavoriteFromList(getCurrentUser().getUid(), response);
-                }
+        mLike.setOnClickListener(v -> {
+            if (!favorite) {
+                favorite = true;
+                updateUiFavorite();
+                userViewModel.createFavoriteList(getCurrentUser().getUid(), response);
+            } else {
+                favorite = false;
+                updateUiFavorite();
+                userViewModel.deleteFavoriteFromList(getCurrentUser().getUid(), response);
             }
         });
-
     }
 
     private void updateUiFavorite() {
