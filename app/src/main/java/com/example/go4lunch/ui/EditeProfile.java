@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.R;
 import com.example.go4lunch.model.User;
+import com.example.go4lunch.repository.RepositoryPlaces;
 import com.example.go4lunch.repository.RepositoryUser;
 import com.example.go4lunch.repository.RepositoryWorkmates;
 import com.example.go4lunch.viewmodel.ViewModelFactory;
@@ -46,6 +47,7 @@ public class EditeProfile extends AppCompatActivity {
     private Uri uriImageSelected = null;
     private RepositoryUser repositoryUser = new RepositoryUser();
     private RepositoryWorkmates repositoryWorkmates = new RepositoryWorkmates();
+    private RepositoryPlaces repositoryPlaces = new RepositoryPlaces();
 
     private Executor executor;
     private UserViewModel userViewModel;
@@ -99,7 +101,7 @@ public class EditeProfile extends AppCompatActivity {
 
     private void configureViewModel() {
         FirebaseUser currentUser = this.getCurrentUser();
-        ViewModelFactory mViewModelFactory = new ViewModelFactory(repositoryUser, repositoryWorkmates, executor);
+        ViewModelFactory mViewModelFactory = new ViewModelFactory(repositoryUser, repositoryWorkmates, executor, repositoryPlaces);
         this.userViewModel = ViewModelProviders.of(this, mViewModelFactory).get(UserViewModel.class);
 
     }

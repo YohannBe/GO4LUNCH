@@ -21,6 +21,7 @@ import com.example.go4lunch.BuildConfig;
 import com.example.go4lunch.R;
 import com.example.go4lunch.model.Lunch;
 import com.example.go4lunch.model.User;
+import com.example.go4lunch.repository.RepositoryPlaces;
 import com.example.go4lunch.repository.RepositoryUser;
 import com.example.go4lunch.repository.RepositoryWorkmates;
 import com.example.go4lunch.tool.Tool;
@@ -40,7 +41,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewAdapter.UpdateWorkmatesListener {
@@ -52,6 +52,7 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
     private UserViewModel userViewModel;
     private RecyclerVIewAdapter adapter;
     private RepositoryUser repositoryUser = new RepositoryUser();
+    private RepositoryPlaces repositoryPlaces = new RepositoryPlaces();
     private RepositoryWorkmates repositoryWorkmates = new RepositoryWorkmates();
     private Executor executor;
     private String response = null;
@@ -100,7 +101,7 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        userViewModel = new UserViewModel(repositoryUser, repositoryWorkmates, executor);
+        userViewModel = new UserViewModel(repositoryUser, repositoryWorkmates, executor, repositoryPlaces);
         userViewModel.getAllUsersFromRestaurant(response).observe(this, this::getAllUsers);
     }
 

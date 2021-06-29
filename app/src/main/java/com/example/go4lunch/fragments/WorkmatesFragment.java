@@ -31,19 +31,16 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class WorkmatesFragment extends Fragment implements  RecyclerVIewAdapter.UpdateWorkmatesListener{
-    RecyclerView recyclerView;
-
+public class WorkmatesFragment extends Fragment implements RecyclerVIewAdapter.UpdateWorkmatesListener {
+    private RecyclerView recyclerView;
     private UserViewModel userViewModel;
     private RecyclerVIewAdapter adapter;
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-         adapter = new RecyclerVIewAdapter(getContext(), this);
+        adapter = new RecyclerVIewAdapter(getContext(), this);
     }
-
-
 
 
     public WorkmatesFragment() {
@@ -72,9 +69,8 @@ public class WorkmatesFragment extends Fragment implements  RecyclerVIewAdapter.
 
 
         userViewModel = ViewModelProviders.of(getActivity()).get(UserViewModel.class);
-        userViewModel.getAllUsers().observe(this, this:: getAllUsers);
+        userViewModel.getAllUsers().observe(this, this::getAllUsers);
         recyclerView = view.findViewById(R.id.recyclerview_widget_list);
-
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 

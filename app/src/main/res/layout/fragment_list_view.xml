@@ -6,9 +6,10 @@
     tools:context=".fragments.ListViewFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="hello there" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview_restaurant_list_format"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="10dp"/>
 
 </FrameLayout>

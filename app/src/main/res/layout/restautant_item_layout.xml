@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginTop="20dp"
+    android:id="@+id/restaurant_list_recyclerview_layout">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="80dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/name_restaurant_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="le zinc"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/address_restaurant_item"
+            android:layout_width="200dp"
+            android:autoSizeTextType="uniform"
+            android:layout_height="wrap_content"
+            android:text="25 rue jules david"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/schedules_restaurant_item"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="24/7"
+            android:textStyle="italic"
+            android:autoSizeTextType="uniform"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="80dp"
+        android:layout_marginEnd="10dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toStartOf="@id/picture_restaurant_item"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/distance_restaurant_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="170m"
+            android:textColor="@color/colorLightGray"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/quantity_persons_restaurant_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:drawableStart="@drawable/person_user_icons"
+            android:text="(3)"
+            android:layout_weight="1"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/star1_restaurant_item"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/star_icons_rating" />
+
+            <ImageView
+                android:id="@+id/star2_restaurant_item"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/star_icons_rating" />
+
+            <ImageView
+                android:id="@+id/star3_restaurant_item"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/star_icons_rating" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/picture_restaurant_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:cardCornerRadius="5dp">
+        <ImageView
+            android:id="@+id/picture_restaurant_item_actual"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            />
+    </androidx.cardview.widget.CardView>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

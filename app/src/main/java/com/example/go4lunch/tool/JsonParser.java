@@ -1,4 +1,4 @@
-package com.example.go4lunch.fragments;
+package com.example.go4lunch.tool;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.Manifest;
 import android.content.Context;
@@ -14,7 +15,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,17 +22,18 @@ import android.widget.Toast;
 
 import com.example.go4lunch.BuildConfig;
 import com.example.go4lunch.R;
+import com.example.go4lunch.tool.JsonParser;
+import com.example.go4lunch.tool.Tool;
 import com.example.go4lunch.ui.DetailRestaurant;
-import com.example.go4lunch.ui.MainActivity;
+import com.example.go4lunch.ui.UserViewModel;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,20 +43,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 public class MainFragment extends Fragment {
 
     private final int REQUEST_LOCATION_PERMISSION = 1234;
     private static GoogleMap mGoogleMap;
+    private UserViewModel userViewModel;
+    private List<HashMap<String, String>> places = new ArrayList<>();
+    private LatLng myLocation;
+    private float zoomLevel = 15.0f;
+    private FloatingActionButton focusUserButton;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -79,13 +83,24 @@ public class MainFragment extends Fragment {
             LocationListener androidLocationListener = new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-
-                    LatLng myLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                    mGoogleMap.addMarker(new MarkerOptions().position(myLocation).title("Marker in your location"));
-                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
-                    mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
+                    myLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, zoomLevel));
 
                     initUrlMapsNearby(myLocation);
+                    userViewModel.getAlreadyChosenRestaurant().observe(getViewLifecycleOwner(), this::updateMarkers);
+                }
+
+                private void updateMarkers(List<String> list) {
+                    for (int i = 0; i < list.size(); i++) {
+                        for (int j = 0; j < places.size(); j++) {
+                            HashMap<String, String> hashMapList = places.get(j);
+                            if (list.get(i).contains(hashMapList.get("place_id"))) {
+                                MarkerOptions options = Tool.createMarker(hashMapList, true, getActivity());
+                                mGoogleMap.addMarker(options).setTag(hashMapList.get("place_id"));
+                            }
+                        }
+                    }
+
                 }
 
                 @Override
@@ -124,7 +139,11 @@ public class MainFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        View v = inflater.inflate(R.layout.fragment_main, container, false);
+        userViewModel = ViewModelProviders.of(getActivity()).get(UserViewModel.class);
+        focusUserButton = v.findViewById(R.id.focus_userFloating_button);
+        focusUserButton.setOnClickListener(v1 -> mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, zoomLevel)));
+        return v;
     }
 
     @Override
@@ -135,10 +154,9 @@ public class MainFragment extends Fragment {
         if (mapFragment != null) {
             mapFragment.getMapAsync(callback);
             Places.initialize(getActivity(), BuildConfig.MAPS_API_KEY);
-
-            PlacesClient placesClient = Places.createClient(getActivity());
         }
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -202,7 +220,7 @@ public class MainFragment extends Fragment {
         return data;
     }
 
-    private class ParserTask extends AsyncTask<String, Integer, List<HashMap<String, String>>> {
+    public class ParserTask extends AsyncTask<String, Integer, List<HashMap<String, String>>> {
         @Override
         protected List<HashMap<String, String>> doInBackground(String... strings) {
 
@@ -221,30 +239,20 @@ public class MainFragment extends Fragment {
         @Override
         protected void onPostExecute(List<HashMap<String, String>> hashMaps) {
             mGoogleMap.clear();
+            mGoogleMap.addMarker(new MarkerOptions().position(myLocation).title("Marker in your location"));
+            places = hashMaps;
+
             for (int i = 0; i < hashMaps.size(); i++) {
                 HashMap<String, String> hashMapList = hashMaps.get(i);
-                LatLng latLng = new LatLng(Double.parseDouble(hashMapList.get("lat")),
-                        Double.parseDouble(hashMapList.get("lng")));
-                String name = hashMapList.get("name");
                 String id = hashMapList.get("place_id");
-
-
-                MarkerOptions options = new MarkerOptions();
-
-                options.position(latLng);
-                options.title(name);
-
-                mGoogleMap.addMarker(options)
-                        .setTag(id);
-                mGoogleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                    @Override
-                    public boolean onMarkerClick(@NonNull Marker marker) {
-                        Intent intent = new Intent(getActivity(), DetailRestaurant.class);
-                        String mId = marker.getTag().toString();
-                        intent.putExtra("restaurantId", mId);
-                        startActivity(intent);
-                        return false;
-                    }
+                MarkerOptions options = Tool.createMarker(hashMapList, false, getActivity());
+                mGoogleMap.addMarker(options).setTag(id);
+                mGoogleMap.setOnMarkerClickListener(marker -> {
+                    Intent intent = new Intent(getActivity(), DetailRestaurant.class);
+                    String mId = marker.getTag().toString();
+                    intent.putExtra("restaurantId", mId);
+                    startActivity(intent);
+                    return false;
                 });
             }
         }
