@@ -52,11 +52,9 @@ public class MainFragment extends Fragment {
     private WorkmateViewModel workmateViewModel;
     private List<HashMap<String, String>> places = new ArrayList<>();
     private LatLng myLocation;
-    private float zoomLevel = 15.0f;
-    private FloatingActionButton focusUserButton;
-    private List<User> userListWithReservation = new ArrayList<>();
-
-    private OnMapReadyCallback callback = new OnMapReadyCallback() {
+    private final float zoomLevel = 15.0f;
+    private final List<User> userListWithReservation = new ArrayList<>();
+    private final OnMapReadyCallback callback = new OnMapReadyCallback() {
 
         @Override
         public void onMapReady(GoogleMap googleMap) {
@@ -110,42 +108,32 @@ public class MainFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
         this.workmateViewModel = new WorkmateViewModel();
         this.placeViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(PlaceViewModel.class);
-        focusUserButton = v.findViewById(R.id.focus_userFloating_button);
+        FloatingActionButton focusUserButton = v.findViewById(R.id.focus_userFloating_button);
         focusUserButton.setOnClickListener(v1 -> mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, zoomLevel)));
         return v;
     }
 
-    private void getIdPlaces(List<HashMap<String, String>> hashMaps) {
-        if (myLocation != null) {
-            mGoogleMap.clear();
-            mGoogleMap.addMarker(new MarkerOptions().position(myLocation).title("Marker in your location"));
-            places = hashMaps;
-            workmateViewModel.getDocumentLunchListRestaurant().observe(getViewLifecycleOwner(), this::updateMarkers);
-            putTheMarkers();
-            mGoogleMap.setOnMarkerClickListener(marker -> {
-                Intent intent = new Intent(getActivity(), DetailRestaurant.class);
-                String mId = marker.getTag().toString();
-                intent.putExtra("restaurantId", mId);
-                startActivity(intent);
-                return false;
-            });
-        }
-    }
 
     private void putTheMarkers() {
         mGoogleMap.clear();
+        boolean userExist;
+        int j;
         if (userListWithReservation.size() != 0) {
-
             for (int i = 0; i < places.size(); i++) {
                 HashMap<String, String> hashMapList = places.get(i);
-                for (int j = 0; j < userListWithReservation.size(); j++) {
+                j = 0;
+                userExist = false;
+                while (j < userListWithReservation.size() && !userExist) {
                     if (Tool.checkIdDateRestaurantExist(userListWithReservation.get(j), hashMapList.get("place_id"))) {
                         MarkerOptions options = Tool.createMarker(hashMapList, true, getActivity());
                         mGoogleMap.addMarker(options).setTag(hashMapList.get("place_id"));
-                    } else {
-                        MarkerOptions options = Tool.createMarker(hashMapList, false, getActivity());
-                        mGoogleMap.addMarker(options).setTag(hashMapList.get("place_id"));
+                        userExist = true;
                     }
+                    j++;
+                }
+                if (!userExist) {
+                    MarkerOptions options = Tool.createMarker(hashMapList, false, getActivity());
+                    mGoogleMap.addMarker(options).setTag(hashMapList.get("place_id"));
                 }
             }
         } else {
@@ -155,13 +143,16 @@ public class MainFragment extends Fragment {
                 mGoogleMap.addMarker(options).setTag(hashMapList.get("place_id"));
             }
         }
+
+        mGoogleMap.setOnMarkerClickListener(marker -> {
+            Intent intent = new Intent(getActivity(), DetailRestaurant.class);
+            String mId = marker.getTag().toString();
+            intent.putExtra("restaurantId", mId);
+            startActivity(intent);
+            return false;
+        });
     }
 
-    private void updateMarkers(List<User> list) {
-        userListWithReservation.addAll(list);
-        mGoogleMap.clear();
-        putTheMarkers();
-    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -171,12 +162,28 @@ public class MainFragment extends Fragment {
         if (mapFragment != null) {
             mapFragment.getMapAsync(callback);
             placeViewModel.getHashMapsIds().observe(this, this::getIdPlaces);
+            workmateViewModel.getDocumentLunchListRestaurant().observe(getViewLifecycleOwner(), this::updateList);
             Places.initialize(getActivity(), BuildConfig.MAPS_API_KEY);
         }
     }
 
+    private void getIdPlaces(List<HashMap<String, String>> hashMaps) {
+        if (myLocation != null) {
+            places = hashMaps;
+            if (places.size() != 0)
+                putTheMarkers();
+        }
+    }
+
+    private void updateList(List<User> list) {
+        userListWithReservation.clear();
+        userListWithReservation.addAll(list);
+        if (places.size() != 0 && userListWithReservation.size() != 0)
+            putTheMarkers();
+    }
+
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         // Forward results to EasyPermissions

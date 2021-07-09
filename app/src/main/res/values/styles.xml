@@ -7,4 +7,12 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorSecondary">@color/colorSecondary</item>
     </style>
+
+
+    <style name="go4lunchTheme.ChatDiscussion">
+        <item name="android:windowBackground">@color/background_chat</item>
+    </style>
+
+
+
 </resources>

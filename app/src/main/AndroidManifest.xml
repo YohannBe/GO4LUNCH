@@ -21,16 +21,11 @@
         android:supportsRtl="true"
         android:theme="@style/go4lunchTheme">
 
-        <activity android:name=".ui.ChatDiscussion"
-            android:parentActivityName=".ui.MainActivity"/>
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/.
-        -->
+        <activity
+            android:name=".ui.ChatDiscussion"
+            android:parentActivityName=".ui.MainActivity"
+            android:theme="@style/go4lunchTheme.ChatDiscussion"/>
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/food_icons" />
@@ -43,7 +38,6 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
 
 
         <activity android:name=".ui.EditProfile" />
@@ -82,7 +76,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".notification.LunchReminder"></receiver>
+        <receiver android:name=".notification.LunchReminder" />
     </application>
 
 </manifest>

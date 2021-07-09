@@ -18,6 +18,7 @@
     <color name="colorSecondary">#02ee64</color>
     <color name="colorSecondaryDark">#008500</color>
     <color name="colorSecondaryLight">#e2fde6</color>
+    <color name="background_chat">#fff8e1</color>
     <color name ="com_facebook_button_background_color_focused_disabled">#EDF0F5</color>
     <color name="com_facebook_button_background_color_focused">#ADB9D3</color>
     <color name="com_facebook_button_border_color_focused">#ADB9D3</color>
