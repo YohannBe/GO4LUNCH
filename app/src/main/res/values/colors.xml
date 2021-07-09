@@ -9,10 +9,11 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="colorPrimary">#EE6402</color>
-    <color name="colorPrimaryDark">#e54703</color>
-    <color name="colorPrimaryLight">#ffdeb1</color>
+    <color name="colorPrimaryDark">#b43300</color>
+    <color name="colorPrimaryLight">#ff953e</color>
     <color name="colorAccent">#028cee</color>
-    <color name="colorAccentLighter">#bbdffe</color>
+    <color name="colorAccentLighter">#65bcff</color>
+    <color name="colorAccentDarker">#0060bb</color>
     <color name="colorLightGray">#bbbbbb</color>
     <color name="colorSecondary">#02ee64</color>
     <color name="colorSecondaryDark">#008500</color>
@@ -22,4 +23,6 @@
     <color name="com_facebook_button_border_color_focused">#ADB9D3</color>
     <color name="facebook_color_background">#3B5998</color>
     <color name="google_background_color">#dd4b39</color>
+    <color name="text_no_choice_yet">#808080</color>
+    <color name="gold">#ffd700</color>
 </resources>

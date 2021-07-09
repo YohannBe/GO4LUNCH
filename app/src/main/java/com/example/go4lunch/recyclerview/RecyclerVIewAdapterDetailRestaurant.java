@@ -1,42 +1,37 @@
-package com.example.go4lunch.ui;
+package com.example.go4lunch.recyclerview;
 
 import android.content.Context;
 
-import android.graphics.Color;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.R;
 import com.example.go4lunch.model.User;
-import com.google.firebase.storage.FirebaseStorage;
+import com.example.go4lunch.tool.Tool;
+import com.example.go4lunch.ui.ChatDiscussion;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
-public class RecyclerVIewAdapter extends RecyclerView.Adapter<RecyclerVIewAdapter.ViewHolder> {
+public class RecyclerVIewAdapterDetailRestaurant extends RecyclerView.Adapter<RecyclerVIewAdapterDetailRestaurant.ViewHolder> {
 
-    private Context context;
+    private final Context context;
     private List<User> userList = new ArrayList<>();
-    private String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+    private final String date = Tool.giveActualDate();
 
     @NonNull
     private final UpdateWorkmatesListener updateWorkmatesListener;
 
-    public RecyclerVIewAdapter(Context context, final UpdateWorkmatesListener updateWorkmatesListener) {
+    public RecyclerVIewAdapterDetailRestaurant(Context context, @NonNull final UpdateWorkmatesListener updateWorkmatesListener) {
         this.context = context;
         this.updateWorkmatesListener = updateWorkmatesListener;
     }
@@ -53,8 +48,7 @@ public class RecyclerVIewAdapter extends RecyclerView.Adapter<RecyclerVIewAdapte
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_layout, parent, false);
-        ViewHolder holder = new ViewHolder(view, updateWorkmatesListener);
-        return holder;
+        return new ViewHolder(view, updateWorkmatesListener);
     }
 
     public interface UpdateWorkmatesListener {
@@ -65,36 +59,29 @@ public class RecyclerVIewAdapter extends RecyclerView.Adapter<RecyclerVIewAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         if (context != null) {
             if (userList.get(position).getUrlPicture() != null) {
-                String emplacement = userList.get(position).getUrlPicture();
-                FirebaseStorage.getInstance().getReference(emplacement).getDownloadUrl()
-                        .addOnSuccessListener(uri -> Glide.with(context)
-                                .load(uri)
-                                .apply(RequestOptions.circleCropTransform())
-                                .into(holder.imageView));
-            } else {
-                Glide.with(context)
-                        .load(R.drawable.person_icons)
-                        .apply(RequestOptions.circleCropTransform())
-                        .into(holder.imageView);
+                Tool.updatePictureGlide(holder.imageView, userList.get(position).getUrlPicture(), context);
             }
         }
-        String sentence = userList.get(position).getFirstName();
+        assert context != null;
+        String sentence = userList.get(position).getFirstName() + context.getString(R.string.text_no_choice_yet);
+        holder.textView.setTextColor(ContextCompat.getColor(context, R.color.text_no_choice_yet));
 
-        if(userList.get(position).getDateLunch() != null){
-            if (userList.get(position).getDateLunch().get(date) != null){
-                if (userList.get(position).getDateLunch().get(date).getRestaurantName() != null)
-                    sentence = sentence +
-                            " is going to "+ userList.get(position).getDateLunch().get(date).getRestaurantName();
+        if (userList.get(position).getDateLunch() != null) {
+            if (userList.get(position).getDateLunch().get(date) != null) {
+                if (userList.get(position).getDateLunch().get(date).getRestaurantName() != null) {
+                    sentence = userList.get(position).getFirstName() + " " +context.getString(R.string.text_choice_done)+ " " + userList.get(position).getDateLunch().get(date).getRestaurantName();
+                    holder.textView.setTextColor(ContextCompat.getColor(context, R.color.black));
+                }
             }
-        } else {
-            sentence = sentence + " has not decided yet";
-            holder.textView.setTextColor(Color.parseColor("#808080"));
         }
+
         holder.textView.setText(sentence);
 
         holder.parentLayout.setOnClickListener(v ->
                 {
-                    Toast.makeText(context, userList.get(position).getFirstName(), Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(context, ChatDiscussion.class);
+                    intent.putExtra("idSecondUser", userList.get(position).getUid());
+                    context.startActivity(intent);
                 }
         );
 
@@ -117,12 +104,9 @@ public class RecyclerVIewAdapter extends RecyclerView.Adapter<RecyclerVIewAdapte
 
         public ViewHolder(@NonNull View itemView, UpdateWorkmatesListener updateWorkmatesListener) {
             super(itemView);
-
             imageView = itemView.findViewById(R.id.imageView_workmates);
             textView = itemView.findViewById(R.id.textview_destination_users);
             parentLayout = itemView.findViewById(R.id.user_recyclerview_layout);
-
-
         }
     }
 }

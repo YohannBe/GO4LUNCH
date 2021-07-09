@@ -4,42 +4,39 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 
 import com.example.go4lunch.R;
-import com.example.go4lunch.model.Lunch;
 import com.example.go4lunch.model.User;
-import com.example.go4lunch.ui.RecyclerVIewAdapter;
-import com.example.go4lunch.ui.UserViewModel;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.example.go4lunch.recyclerview.RecyclerViewAdapterListWorkmate;
 
-import java.text.SimpleDateFormat;
-import java.time.chrono.JapaneseDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
+import com.example.go4lunch.viewmodel.WorkmateViewModel;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.Query;
+
+import java.util.Objects;
 
 
-public class WorkmatesFragment extends Fragment implements RecyclerVIewAdapter.UpdateWorkmatesListener {
-    private RecyclerView recyclerView;
-    private UserViewModel userViewModel;
-    private RecyclerVIewAdapter adapter;
+public class WorkmatesFragment extends Fragment implements RecyclerViewAdapterListWorkmate.Listener {
+    private WorkmateViewModel workmateViewModel;
+    private RecyclerViewAdapterListWorkmate recyclerViewAdapterListWorkmate;
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        adapter = new RecyclerVIewAdapter(getContext(), this);
+        workmateViewModel = new WorkmateViewModel();
+        this.configureRecyclerView(getActivity());
     }
 
 
@@ -50,39 +47,49 @@ public class WorkmatesFragment extends Fragment implements RecyclerVIewAdapter.U
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_workmates, container, false);
-
         initWorkmateFragment(view);
-
         return view;
     }
 
 
     private void initWorkmateFragment(View view) {
-
-
-        userViewModel = ViewModelProviders.of(getActivity()).get(UserViewModel.class);
-        userViewModel.getAllUsers().observe(this, this::getAllUsers);
-        recyclerView = view.findViewById(R.id.recyclerview_widget_list);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerview_widget_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(this.recyclerViewAdapterListWorkmate);
     }
 
-    private void getAllUsers(List<User> userList) {
-        userList = userViewModel.updateListUserSort(userList);
-        adapter.updateWorkmateList(userList);
+    private void configureRecyclerView(FragmentActivity activity) {
+        this.recyclerViewAdapterListWorkmate = new RecyclerViewAdapterListWorkmate(generateOptionsForAdapter
+                (workmateViewModel.getDocumentsQuery(Objects.requireNonNull(getCurrentUser()).getUid())), this, activity);
+        recyclerViewAdapterListWorkmate.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+
+            }
+        });
     }
+
+    private FirestoreRecyclerOptions<User> generateOptionsForAdapter(Query query) {
+        return new FirestoreRecyclerOptions.Builder<User>()
+                .setQuery(query, User.class)
+                .setLifecycleOwner(this)
+                .build();
+    }
+
+
+    @Nullable
+    protected FirebaseUser getCurrentUser() {
+        return FirebaseAuth.getInstance().getCurrentUser();
+    }
+
 
     @Override
-    public void onUpdateWorkmate(User user) {
-
+    public void onDataChanged() {
     }
 }

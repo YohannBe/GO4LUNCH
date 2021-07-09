@@ -2,24 +2,40 @@ package com.example.go4lunch.api;
 
 import com.example.go4lunch.model.Lunch;
 import com.example.go4lunch.model.User;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.go4lunch.tool.Tool;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
-public class UserHelper {
+public final class UserHelper {
 
+    private static volatile UserHelper instance;
     public static final String COLLECTION_USER = "users";
+
+
+    private UserHelper() {
+    }
+
+    public static UserHelper getInstance() {
+        UserHelper result = instance;
+        if (result != null) {
+            return result;
+        }
+        synchronized (UserHelper.class) {
+            if (instance == null) {
+                instance = new UserHelper();
+            }
+            return instance;
+        }
+    }
+
 
     public static CollectionReference getUsersCollection() {
         return FirebaseFirestore.getInstance().collection(COLLECTION_USER);
@@ -33,21 +49,18 @@ public class UserHelper {
     }
 
 
-    public void createLunchUser(String uid, String restaurantId, String restaurantName, String restaurantType) {
-        this.getUser(uid).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                User user = documentSnapshot.toObject(User.class);
-                Map<String, Object> updates = new HashMap<>();
-                String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-                Lunch lunchToCreate = new Lunch(restaurantId, uid, restaurantName, restaurantType);
-                DocumentReference docRef = UserHelper.getUsersCollection().document(uid);
-                if (user.getDateLunch() != null) {
-                    updates.putAll(user.getDateLunch());
-                }
-                updates.put(date, lunchToCreate);
-                docRef.update("dateLunch", updates);
+    public void createLunchUser(String uid, String restaurantId, String restaurantName, String restaurantType, String address) {
+        this.getUser(uid).addOnSuccessListener(documentSnapshot -> {
+            User user = documentSnapshot.toObject(User.class);
+            Map<String, Object> updates = new HashMap<>();
+            String date = Tool.giveDependingDate();
+                Lunch lunchToCreate = new Lunch(restaurantId, uid, restaurantName, restaurantType, address);
+            DocumentReference docRef = UserHelper.getUsersCollection().document(uid);
+            if (user.getDateLunch() != null) {
+                updates.putAll(user.getDateLunch());
             }
+            updates.put(date, lunchToCreate);
+            docRef.update("dateLunch", updates);
         });
 
     }
@@ -87,21 +100,20 @@ public class UserHelper {
     }
 
     public void deleteReservation(String uid) {
-        this.getUser(uid).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
+        this.getUser(uid).addOnSuccessListener(documentSnapshot -> {
 
-                User user = documentSnapshot.toObject(User.class);
-                String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-                DocumentReference docRef = UserHelper.getUsersCollection().document(uid);
-                Map<String, Object> updates = new HashMap<>();
-                if (user.getDateLunch() != null) {
-                    updates.putAll(user.getDateLunch());
-                }
-                updates.remove(date);
+            User user = documentSnapshot.toObject(User.class);
 
-                docRef.update("dateLunch", updates);
+            String date = Tool.giveDependingDate();
+
+            DocumentReference docRef = UserHelper.getUsersCollection().document(uid);
+            Map<String, Object> updates = new HashMap<>();
+            if (user.getDateLunch() != null) {
+                updates.putAll(user.getDateLunch());
             }
+            updates.remove(date);
+
+            docRef.update("dateLunch", updates);
         });
     }
 
@@ -124,4 +136,6 @@ public class UserHelper {
     public Task<Void> deleteUser(String uid) {
         return UserHelper.getUsersCollection().document(uid).delete();
     }
+
+
 }

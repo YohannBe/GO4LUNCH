@@ -40,7 +40,7 @@ public class LogIn extends AppCompatActivity {
                         .setTheme(R.style.Theme_AppCompat_Light_NoActionBar)
                         .build(),
                 RC_SIGN_IN);
-        finish();
+
     }
 
     @Override
@@ -48,10 +48,10 @@ public class LogIn extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         Toast.makeText(this, "ici2", Toast.LENGTH_SHORT)
                 .show();
-        this.handleResponseAfterSigningIn(requestCode, resultCode, data);
+        this.handleResponseAfterSigningIn(requestCode, resultCode);
     }
 
-    private void handleResponseAfterSigningIn(int requestCode, int resultCode, @Nullable Intent data) {
+    private void handleResponseAfterSigningIn(int requestCode, int resultCode) {
 
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {

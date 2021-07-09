@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GO4LUNCH</string>
+    <string name="appTitleMain">J\'ai faim !</string>
+    <string name="go4lunch">Go4Lunch</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="map_view">Carte</string>
+    <string name="list_view">Liste</string>
+    <string name="workmates">Collègues</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
+    <string name="location_permission">La permission à déjà été obbtenue</string>
+    <string name="ask_permission">Autorisez l\'utilisation de la localisation</string>
+    <string name="no_number_phone">Il semble qu\'aucun numéro de téléphone ne soit renseigné</string>
+    <string name="no_website">Il semble qu\'aucun site web ne soit renseigné</string>
+    <string name="text_no_choice_yet">" n'a pas encore decidé"</string>
+    <string name="text_choice_done">" va à "</string>
+    <string name="delete_from_favorite">Ce restaurant a été retiré de votre liste des favoris</string>
+    <string name="add_place_favorite">Ce restaurant a été ajouté à vos favoris</string>
+    <string name="empty_fields">Tous les champs doivent être remplis</string>
+    <string name="no_photo_choosen">Aucune photo n\'a été choisie</string>
+    <string name="update_fname_hint">Actualise ton prénom</string>
+    <string name="update_lname_hint">Actualise ton nom de famille</string>
+    <string name="lname_not_found">Nom de famille non existant</string>
+    <string name="fname_notfound">Prénom non existant</string>
+    <string name="write_your_last_name">Ton nom</string>
+    <string name="write_your_first_name">Ton prénom</string>
+    <string name="last_name">Nom de famille</string>
+    <string name="first_name">Prénom</string>
+    <string name="save_the_changes">Sauvegarder les changements</string>
+    <string name="like">J\'aime</string>
+    <string name="website">Site web</string>
+    <string name="logout">Se déconnecter</string>
+    <string name="settings">Réglages</string>
+    <string name="your_lunch">Ma reservation</string>
+    <string name="write_your_message">Taper message</string>
+    <string name="no_conversation">Aucun message</string>
+    <string name="send">Envoyer</string>
+    <string name="find_a_nice_restaurant_and_invite_your_co_worker_for_lunch">Trouve un bon restaurant et invites tes gollègues</string>
+    <string name="sign_in_with_mail">Se connecter par mail</string>
+    <string name="sign_in_with_facebook">Se connecter avec Facebook</string>
+    <string name="sign_in_with_google">Se connecter avec Google</string>
+    <string name="call">Appel</string>
+    <string name="cancel_reservation">Annuler réservation</string>
+    <string name="edit_profile">Modifier le profil</string>
+    <string name="your_favorite">Mes favoris</string>
+    <string name="we_are_eating_there_today">Nous mangeons ici aujourd\'hui !</string>
+    <string name="no_reservation_yet">Pas de réservation pour le moment</string>
+    <string name="search_places">Cherches une place</string>
+
+</resources>

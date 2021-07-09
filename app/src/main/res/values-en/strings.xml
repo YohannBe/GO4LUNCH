@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GO4LUNCH</string>
+    <string name="appTitleMain">I am hungry!</string>
+    <string name="go4lunch">Go4Lunch</string>
+    <string name="location_permission">Permission has already been granted</string>
+    <string name="ask_permission">Please accept the use of your location</string>
+    <string name="no_number_phone">It seems that there is no phone number</string>
+    <string name="no_website">It seems that there is no website</string>
+    <string name="text_no_choice_yet">" has not chosen yet"</string>
+    <string name="text_choice_done">" will go to "</string>
+    <string name="delete_from_favorite">This restaurant has been deleted from your favorites</string>
+    <string name="add_place_favorite">This restaurant has been added to your favorites</string>
+    <string name="empty_fields">Every fields need to be filled</string>
+    <string name="no_photo_choosen">No photo chosen</string>
+    <string name="update_fname_hint">Actualise your first name</string>
+    <string name="update_lname_hint">Actualise your last name</string>
+    <string name="lname_not_found">No last name found</string>
+    <string name="fname_notfound">No first name found</string>
+    <string name="write_your_last_name">Write your last name</string>
+    <string name="write_your_first_name">Write your first name</string>
+    <string name="last_name">Last name</string>
+    <string name="first_name">First name</string>
+    <string name="workmates">Workmates</string>
+    <string name="list_view">List View</string>
+    <string name="map_view">Map view</string>
+    <string name="like">LIKE</string>
+    <string name="website">WEBSITE</string>
+    <string name="logout">LOGOUT</string>
+    <string name="settings">SETTINGS</string>
+    <string name="your_lunch">YOUR LUNCH</string>
+    <string name="save_the_changes">Save the changes</string>
+    <string name="write_your_message">Write your message</string>
+    <string name="no_conversation">No conversation</string>
+    <string name="send">Send</string>
+    <string name="find_a_nice_restaurant_and_invite_your_co_worker_for_lunch">Find a nice restaurant and invite your co-worker for lunch!</string>
+    <string name="sign_in_with_mail">Sign in with mail</string>
+    <string name="sign_in_with_facebook">Sign in with Facebook</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="call">CALL</string>
+    <string name="cancel_reservation">Cancel reservation</string>
+    <string name="edit_profile">Edit profile</string>
+    <string name="your_favorite">Your favorite</string>
+    <string name="we_are_eating_there_today">We are eating there today!</string>
+    <string name="no_reservation_yet">no reservation yet</string>
+    <string name="search_places">Search places</string>
+</resources>

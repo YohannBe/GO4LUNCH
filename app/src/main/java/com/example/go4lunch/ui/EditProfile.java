@@ -3,53 +3,53 @@ package com.example.go4lunch.ui;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProviders;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.R;
 import com.example.go4lunch.model.User;
-import com.example.go4lunch.repository.RepositoryPlaces;
-import com.example.go4lunch.repository.RepositoryUser;
-import com.example.go4lunch.repository.RepositoryWorkmates;
-import com.example.go4lunch.viewmodel.ViewModelFactory;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.go4lunch.tool.Tool;
+import com.example.go4lunch.viewmodel.UserViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class EditeProfile extends AppCompatActivity {
+public class EditProfile extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     private EditText firstName, lastName;
-    private String picUrl = null;
-    private Button saveChanges;
     private boolean valueIntent;
     private ImageButton changePic;
     private Uri uriImageSelected = null;
-    private RepositoryUser repositoryUser = new RepositoryUser();
-    private RepositoryWorkmates repositoryWorkmates = new RepositoryWorkmates();
-    private RepositoryPlaces repositoryPlaces = new RepositoryPlaces();
+    private Spinner spinner;
+    private String languageSelected = null;
 
-    private Executor executor;
+    private String firstNameString, lastNameString;
     private UserViewModel userViewModel;
 
 
@@ -60,6 +60,7 @@ public class EditeProfile extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Tool.loadLanguage(this, this, true);
         setContentView(R.layout.activity_edite_profile);
         configureViewModel();
 
@@ -69,8 +70,9 @@ public class EditeProfile extends AppCompatActivity {
 
     private void initPersonalData() {
         if (!valueIntent) {
-            this.userViewModel.getUser(getCurrentUser().getUid()).addOnSuccessListener(documentSnapshot -> {
+            this.userViewModel.getUser(Objects.requireNonNull(getCurrentUser()).getUid()).addOnSuccessListener(documentSnapshot -> {
                 User currentUser = documentSnapshot.toObject(User.class);
+                assert currentUser != null;
                 String userFirstName = TextUtils.isEmpty(currentUser.getFirstName()) ?
                         "" : currentUser.getFirstName();
                 firstName.setHint(userFirstName);
@@ -83,82 +85,79 @@ public class EditeProfile extends AppCompatActivity {
                 String userPic = TextUtils.isEmpty(currentUser.getUrlPicture()) ?
                         "" : currentUser.getUrlPicture();
 
-                if (userPic != "" && userPic != null) {
+                if (!userPic.equals("")) {
                     FirebaseStorage.getInstance().getReference(userPic).getDownloadUrl()
-                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    Glide.with(EditeProfile.this)
-                                            .load(uri)
-                                            .apply(RequestOptions.circleCropTransform())
-                                            .into(changePic);
-                                }
-                            });
+                            .addOnSuccessListener(uri -> Glide.with(EditProfile.this)
+                                    .load(uri)
+                                    .apply(RequestOptions.circleCropTransform())
+                                    .into(changePic));
                 }
             });
         }
     }
 
     private void configureViewModel() {
-        FirebaseUser currentUser = this.getCurrentUser();
-        ViewModelFactory mViewModelFactory = new ViewModelFactory(repositoryUser, repositoryWorkmates, executor, repositoryPlaces);
-        this.userViewModel = ViewModelProviders.of(this, mViewModelFactory).get(UserViewModel.class);
-
+        this.userViewModel = new UserViewModel();
     }
 
     private void initElements() {
         firstName = findViewById(R.id.edittext_firstname);
         lastName = findViewById(R.id.editText_lastname);
         changePic = findViewById(R.id.imageButton_edit_profil_pic);
-        saveChanges = findViewById(R.id.button_save_changes_profile);
+        Button saveChanges = findViewById(R.id.button_save_changes_profile);
+        spinner = findViewById(R.id.spinner_languages);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.languages_choice, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
         changePic.setOnClickListener(v -> onClickAddFile());
         valueIntent = getIntent().getBooleanExtra("FIRST", false);
         if (!valueIntent) {
-            firstName.setHint("Update your first name");
-            lastName.setHint("Update your last name");
+            firstName.setHint(R.string.update_fname_hint);
+            lastName.setHint(R.string.update_lname_hint);
         }
         saveChanges.setOnClickListener(v -> {
 
             if (valueIntent) {
                 if (TextUtils.isEmpty(firstName.getText().toString()) || TextUtils.isEmpty(lastName.getText().toString())) {
-                    Toast.makeText(EditeProfile.this, "Fields cannot be empty", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditProfile.this, getString(R.string.empty_fields), Toast.LENGTH_SHORT).show();
                 } else {
-                    User user = new User(getCurrentUser().getUid(),
-                            firstName.getText().toString(),
-                            lastName.getText().toString(),
-                            picUrl);
+                    firstNameString = Tool.nameToUpperCase(firstName.getText().toString());
+                    lastNameString = Tool.nameToUpperCase(lastName.getText().toString());
+                    User user = new User(Objects.requireNonNull(getCurrentUser()).getUid(),
+                            firstNameString,
+                            lastNameString,
+                            null);
 
                     this.userViewModel.createUser(user);
 
                     if (this.uriImageSelected != null) {
                         uploadPhotoToFirebase();
                     }
-                    Intent backToMainActivity = new Intent(EditeProfile.this, MainActivity.class);
+                    Intent backToMainActivity = new Intent(EditProfile.this, MainActivity.class);
                     startActivity(backToMainActivity);
                 }
             } else {
                 if (!TextUtils.isEmpty(firstName.getText().toString())) {
-                    this.userViewModel.updateFirstName(firstName.getText().toString(), getCurrentUser().getUid());
+                    firstNameString = Tool.nameToUpperCase(firstName.getText().toString());
+                    this.userViewModel.updateFirstName(firstNameString, Objects.requireNonNull(getCurrentUser()).getUid());
                 }
                 if (!TextUtils.isEmpty(lastName.getText().toString())) {
-                    this.userViewModel.updateLastName(lastName.getText().toString(), getCurrentUser().getUid());
+                    lastNameString = Tool.nameToUpperCase(lastName.getText().toString());
+                    this.userViewModel.updateLastName(lastNameString, Objects.requireNonNull(getCurrentUser()).getUid());
                 }
                 if (this.uriImageSelected != null) {
                     uploadPhotoToFirebase();
                 }
-                EditeProfile.this.onBackPressed();
+                if (languageSelected != null) {
+                    Tool.setLocal(languageSelected, this, this, true);
+                }
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
             }
         });
     }
 
-    protected OnFailureListener onFailureListener() {
-        return new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
-            }
-        };
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -187,7 +186,7 @@ public class EditeProfile extends AppCompatActivity {
                         .apply(RequestOptions.circleCropTransform())
                         .into(this.changePic);
             } else
-                Toast.makeText(this, "no photo chosen", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.no_photo_choosen), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -199,22 +198,17 @@ public class EditeProfile extends AppCompatActivity {
 
     private void uploadPhotoToFirebase() {
         String uuid = UUID.randomUUID().toString();
-        Toast.makeText(EditeProfile.this, uuid, Toast.LENGTH_SHORT).show();
+        Toast.makeText(EditProfile.this, uuid, Toast.LENGTH_SHORT).show();
         StorageReference mImageRef = FirebaseStorage.getInstance().getReference(uuid);
 
         mImageRef.putFile(this.uriImageSelected)
-                .addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                this.onFailure(e);
-            }
-        });
+                .addOnFailureListener(e -> Toast.makeText(EditProfile.this, e.toString(), Toast.LENGTH_SHORT).show());
 
         updatePicUrl(mImageRef.getPath());
     }
 
     private void updatePicUrl(String uuid) {
-        this.userViewModel.updatePicUrl(uuid, getCurrentUser().getUid());
+        this.userViewModel.updatePicUrl(uuid, Objects.requireNonNull(getCurrentUser()).getUid());
     }
 
 
@@ -228,5 +222,15 @@ public class EditeProfile extends AppCompatActivity {
     @Nullable
     protected FirebaseUser getCurrentUser() {
         return FirebaseAuth.getInstance().getCurrentUser();
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        languageSelected = parent.getItemAtPosition(position).toString();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }

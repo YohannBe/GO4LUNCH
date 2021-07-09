@@ -1,17 +1,18 @@
 package com.example.go4lunch.model;
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Objects;
 
-public class User {
+public class User implements Serializable {
 
     private String uid;
     private String firstName;
     private String lastName;
     private String urlPicture;
-    private Lunch lunch;
     private Map<String, Lunch> dateLunch;
     private ArrayList<String> favorite;
 
@@ -21,14 +22,6 @@ public class User {
 
     public void setFavorite(ArrayList<String> favorite) {
         this.favorite = favorite;
-    }
-
-    public Lunch getLunch() {
-        return lunch;
-    }
-
-    public void setLunch(Lunch lunch) {
-        this.lunch = lunch;
     }
 
     public Map<String, Lunch> getDateLunch() {
@@ -66,12 +59,7 @@ public class User {
     }
     public User(){}
 
-    public static class nameAZComparator implements Comparator<User> {
-        @Override
-        public int compare(User left, User right) {
-            return left.firstName.compareTo(right.firstName);
-        }
-    }
+
 
 
 
@@ -90,4 +78,5 @@ public class User {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
 }

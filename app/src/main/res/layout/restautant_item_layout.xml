@@ -14,9 +14,9 @@
         android:orientation="vertical">
         <TextView
             android:id="@+id/name_restaurant_item"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
+            android:autoSizeTextType="uniform"
             android:layout_height="wrap_content"
-            android:text="le zinc"
             android:textColor="@color/black"
             android:textStyle="bold"
             android:layout_weight="1"/>
@@ -26,14 +26,12 @@
             android:layout_width="200dp"
             android:autoSizeTextType="uniform"
             android:layout_height="wrap_content"
-            android:text="25 rue jules david"
             android:layout_weight="1"/>
 
         <TextView
             android:id="@+id/schedules_restaurant_item"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:text="24/7"
             android:textStyle="italic"
             android:autoSizeTextType="uniform"
             android:layout_weight="1"/>
@@ -53,7 +51,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:text="170m"
             android:textColor="@color/colorLightGray"
             android:layout_weight="1"/>
 
@@ -63,33 +60,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:drawableStart="@drawable/person_user_icons"
-            android:text="(3)"
             android:layout_weight="1"/>
 
-        <LinearLayout
+        <RatingBar
+            android:id="@+id/ratingBar_list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_weight="1">
-
-            <ImageView
-                android:id="@+id/star1_restaurant_item"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/star_icons_rating" />
-
-            <ImageView
-                android:id="@+id/star2_restaurant_item"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/star_icons_rating" />
-
-            <ImageView
-                android:id="@+id/star3_restaurant_item"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/star_icons_rating" />
-        </LinearLayout>
+            android:numStars="3"
+            android:progressBackgroundTint="@color/colorPrimaryDark"
+            android:progressTint="@color/gold"
+            style="@style/Widget.AppCompat.RatingBar.Small" />
 
 
     </LinearLayout>

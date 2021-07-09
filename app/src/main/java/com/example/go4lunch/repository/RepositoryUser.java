@@ -1,5 +1,7 @@
 package com.example.go4lunch.repository;
 
+import android.app.Presentation;
+
 import com.example.go4lunch.api.UserHelper;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -9,10 +11,24 @@ import java.util.Map;
 
 public class RepositoryUser {
 
+    private static volatile RepositoryUser instance;
     private final UserHelper userHelper;
 
     public RepositoryUser() {
-        userHelper = new UserHelper();
+        userHelper = UserHelper.getInstance();
+    }
+
+    public static RepositoryUser getInstance(){
+        RepositoryUser result = instance;
+        if (result != null){
+            return result;
+        }
+        synchronized (RepositoryUser.class){
+            if (instance == null){
+                instance = new RepositoryUser();
+            }
+            return instance;
+        }
     }
 
     public Task<DocumentSnapshot> getUser(String uid){
@@ -34,8 +50,8 @@ public class RepositoryUser {
         return userHelper.updatePic(picUrl, uid);
     }
 
-    public void createLunch(String uid, String restaurantId, String restaurantName, String restaurantType){
-        userHelper.createLunchUser(uid, restaurantId, restaurantName, restaurantType);
+    public void createLunch(String uid, String restaurantId, String restaurantName, String restaurantType, String address){
+        userHelper.createLunchUser(uid, restaurantId, restaurantName, restaurantType, address);
     }
 
     public void deleteFavoriteFromList(String uid, String restaurantId){

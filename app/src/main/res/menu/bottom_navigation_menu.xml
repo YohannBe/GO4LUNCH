@@ -15,7 +15,7 @@
         android:id="@+id/page_3"
         android:enabled="true"
         android:icon="@drawable/workmate_icons"
-        android:title="@string/workmates"/>
+        android:title= "@string/workmates"/>
 
 
 </menu>

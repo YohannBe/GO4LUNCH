@@ -3,13 +3,12 @@ package com.example.go4lunch.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -20,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,9 +29,8 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.model.User;
 import com.example.go4lunch.myInterface.OnButtonClickedListener;
 import com.example.go4lunch.tool.Tool;
-import com.example.go4lunch.ui.DetailRestaurant;
 import com.example.go4lunch.ui.MainActivity;
-import com.example.go4lunch.ui.UserViewModel;
+import com.example.go4lunch.viewmodel.UserViewModel;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
@@ -42,32 +41,30 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.zip.Inflater;
+import java.util.Objects;
 
 
 public class MyReservationRestaurant extends Fragment implements View.OnClickListener {
 
     private OnButtonClickedListener mCallback;
     private UserViewModel userViewModel;
-    private User user;
-    private ImageView picRestaurant, price1, price2, price3, star1, star2, star3, favoriteImageView;
+    private ImageView picRestaurant, price1, price2, price3, favoriteImageView;
     private TextView restaurantName, restaurantAddress, nothingText;
     private PlacesClient placesClient;
     private LinearLayout callButton, website, mLike;
-    int price;
-    double rating;
+    private int price;
+    private double rating;
     private ScrollView container;
     private Button buttonCancel;
-    private boolean alreadyCalled, favorite = false;
+    private boolean favorite = false;
     private String restaurantId;
+    private String keyRestaurant = null;
+    private RatingBar ratingBar;
+    String favoriteAddString;
 
     public MyReservationRestaurant() {
-        // Required empty public constructor
     }
 
     public static MyReservationRestaurant newInstance() {
@@ -85,18 +82,24 @@ public class MyReservationRestaurant extends Fragment implements View.OnClickLis
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View result = inflater.inflate(R.layout.fragment_my_reservation_restaurant, container, false);
-        Places.initialize(getContext(), BuildConfig.MAPS_API_KEY);
-        placesClient = Places.createClient(getActivity());
+        initElements(result);
+        return result;
+    }
+
+    private void initElements(View result) {
+
+
+        Places.initialize(Objects.requireNonNull(getContext()), BuildConfig.MAPS_API_KEY);
+        placesClient = Places.createClient(Objects.requireNonNull(getActivity()));
         userViewModel = ViewModelProviders.of(getActivity()).get(UserViewModel.class);
+        userViewModel.getUserObject(getCurrentUser().getUid()).observe(this, this::myUser);
         picRestaurant = result.findViewById(R.id.imageview_pic_restaurant_mylunch);
         restaurantName = result.findViewById(R.id.textview_name_restaurant_mylunch);
         restaurantAddress = result.findViewById(R.id.address_restaurant_mylunch);
         price1 = result.findViewById(R.id.pricy1);
         price2 = result.findViewById(R.id.pricy2);
         price3 = result.findViewById(R.id.pricy3);
-        star1 = result.findViewById(R.id.star1_mylunch);
-        star2 = result.findViewById(R.id.star2_mylunch);
-        star3 = result.findViewById(R.id.star3_mylunch);
+        ratingBar = result.findViewById(R.id.ratingBar_mylunch);
         this.container = result.findViewById(R.id.scrollView2);
         nothingText = result.findViewById(R.id.noreservation_textview);
         callButton = result.findViewById(R.id.call_buttondetail_mylunch);
@@ -104,47 +107,28 @@ public class MyReservationRestaurant extends Fragment implements View.OnClickLis
         mLike = result.findViewById(R.id.like_buttondetail_mylunch);
         favoriteImageView = result.findViewById(R.id.icon_like_imageview);
         buttonCancel = result.findViewById(R.id.button_myreservation);
-        alreadyCalled = false;
 
         buttonCancel.setOnClickListener(this);
-
-
-        return result;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (!alreadyCalled) {
-            alreadyCalled = true;
-            if (userViewModel != null) {
-                userViewModel.getLunchId(getCurrentUser().getUid()).observe(this, this::getLunchId);
-                userViewModel.getFavoriteList(getCurrentUser().getUid()).observe(this, this::checkFavoriteList);
-            }
-        }
-
-    }
-
-    private void checkFavoriteList(List<String> list) {
-        favorite = Tool.checkFavorite(list, restaurantId);
-        updateUiFavorite();
+    private void myUser(User user) {
+        if (Tool.checkIfDateExist(user)) {
+            restaurantId = user.getDateLunch().get(Tool.giveDependingDate()).getRestaurantId();
+            String restaurantNameString = user.getDateLunch().get(Tool.giveDependingDate()).getRestaurantName();
+            initTentative(restaurantId);
+            Toast.makeText(getActivity(), restaurantId, Toast.LENGTH_SHORT).show();
+            favoriteAddString = restaurantId + "/" + restaurantNameString;
+            favorite = Tool.checkFavorite(user.getFavorite(), favoriteAddString);
+            updateUiFavorite();
+        } else
+            hideElements();
     }
 
     private void updateUiFavorite() {
         if (favorite) {
-            favoriteImageView.setImageResource(R.drawable.star_icons_rating);
+            favoriteImageView.setImageResource(R.drawable.favorite_true_icons);
         } else {
-            favoriteImageView.setImageResource(R.drawable.stars_icons_dark);
-        }
-    }
-
-    private void getLunchId(String s) {
-        if (s != null) {
-            restaurantId = s;
-            initTentative(s);
-
-        } else {
-            hideElements();
+            favoriteImageView.setImageResource(R.drawable.favorite_false_icons);
         }
     }
 
@@ -152,7 +136,7 @@ public class MyReservationRestaurant extends Fragment implements View.OnClickLis
         nothingText.setVisibility(View.VISIBLE);
         this.container.setVisibility(View.GONE);
         buttonCancel.setEnabled(false);
-        buttonCancel.setBackgroundColor(getResources().getColor(R.color.colorAccentLighter));
+        buttonCancel.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.colorLightGray));
     }
 
     private void initTentative(String placeId) {
@@ -168,6 +152,7 @@ public class MyReservationRestaurant extends Fragment implements View.OnClickLis
         placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
             Place place = response.getPlace();
             final List<PhotoMetadata> metadata = place.getPhotoMetadatas();
+            assert metadata != null;
             final PhotoMetadata photoMetadata = metadata.get(0);
 
             final FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
@@ -198,29 +183,27 @@ public class MyReservationRestaurant extends Fragment implements View.OnClickLis
             }
 
             if (0 < rating && rating < 1.6) {
-                star3.setVisibility(View.GONE);
-                star2.setVisibility(View.GONE);
+                ratingBar.setRating(1);
             } else if (rating < 3.2) {
-                star3.setVisibility(View.GONE);
-            } else if (rating == 0){
-                star3.setVisibility(View.GONE);
-                star2.setVisibility(View.GONE);
-                star1.setVisibility(View.GONE);
-            }
+                ratingBar.setRating(2);
+            } else if (rating == 0) {
+                ratingBar.setVisibility(View.GONE);
+            } else if (rating >= 3.2)
+                ratingBar.setRating(3);
 
             placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
                 Bitmap bitmap = fetchPhotoResponse.getBitmap();
                 picRestaurant.setImageBitmap(bitmap);
             }).addOnFailureListener((exception) -> {
                 if (exception instanceof ApiException) {
-                    final ApiException apiException = (ApiException) exception;
                     Log.e("TAG", "Place not found: " + exception.getMessage());
-                    final int statusCode = apiException.getStatusCode();
                 }
             });
 
-            if (place.getName() != null)
+            if (place.getName() != null) {
                 restaurantName.setText(place.getName());
+                keyRestaurant = restaurantId + "/" + place.getName();
+            }
 
             if (place.getAddress() != null)
                 restaurantAddress.setText(place.getAddress());
@@ -232,9 +215,6 @@ public class MyReservationRestaurant extends Fragment implements View.OnClickLis
             initListeners(phone, place.getWebsiteUri());
         }).addOnFailureListener((exception) -> {
             if (exception instanceof ApiException) {
-                ApiException apiException = (ApiException) exception;
-                int statusCode = apiException.getStatusCode();
-                // Handle error with given status code.
                 Log.e("TAG", "Place not found: " + exception.getMessage());
             }
         });
@@ -247,12 +227,13 @@ public class MyReservationRestaurant extends Fragment implements View.OnClickLis
                 Intent intent = new Intent(Intent.ACTION_DIAL);
                 intent.setData(Uri.parse(phoneNumber));
                 startActivity(intent);
-            } else Toast.makeText(getActivity(), "It seems that there is no number phone yet", Toast.LENGTH_SHORT).show();
+            } else
+                Toast.makeText(getActivity(), getString(R.string.no_number_phone), Toast.LENGTH_SHORT).show();
         });
 
         website.setOnClickListener(v -> {
-            if (websiteUri == null || websiteUri.toString() == "") {
-                Toast.makeText(getActivity(), "It seems that there is no website yet", Toast.LENGTH_SHORT).show();
+            if (websiteUri == null || websiteUri.toString().equals("")) {
+                Toast.makeText(getActivity(), getString(R.string.no_website), Toast.LENGTH_SHORT).show();
             } else {
                 Intent intentWeb = new Intent(Intent.ACTION_VIEW).setData(websiteUri);
                 startActivity(intentWeb);
@@ -263,20 +244,21 @@ public class MyReservationRestaurant extends Fragment implements View.OnClickLis
             if (!favorite) {
                 favorite = true;
                 updateUiFavorite();
-                userViewModel.createFavoriteList(getCurrentUser().getUid(), restaurantId);
+                userViewModel.createFavoriteList(Objects.requireNonNull(getCurrentUser()).getUid(), keyRestaurant);
+                Toast.makeText(getActivity(), getString(R.string.add_place_favorite), Toast.LENGTH_SHORT).show();
             } else {
                 favorite = false;
                 updateUiFavorite();
-                userViewModel.deleteFavoriteFromList(getCurrentUser().getUid(), restaurantId);
+                userViewModel.deleteFavoriteFromList(Objects.requireNonNull(getCurrentUser()).getUid(), keyRestaurant);
+                Toast.makeText(getActivity(), getString(R.string.delete_from_favorite), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-
         this.createCallbackToParentActivity();
     }
 

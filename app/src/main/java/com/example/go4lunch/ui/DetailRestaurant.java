@@ -3,9 +3,12 @@ package com.example.go4lunch.ui;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -14,17 +17,18 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.go4lunch.BuildConfig;
 import com.example.go4lunch.R;
-import com.example.go4lunch.model.Lunch;
 import com.example.go4lunch.model.User;
-import com.example.go4lunch.repository.RepositoryPlaces;
-import com.example.go4lunch.repository.RepositoryUser;
-import com.example.go4lunch.repository.RepositoryWorkmates;
+import com.example.go4lunch.notification.LunchReminder;
+import com.example.go4lunch.recyclerview.RecyclerVIewAdapterDetailRestaurant;
 import com.example.go4lunch.tool.Tool;
+import com.example.go4lunch.viewmodel.UserViewModel;
+import com.example.go4lunch.viewmodel.WorkmateViewModel;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
@@ -36,42 +40,38 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.Executor;
+import java.util.Objects;
 
-public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewAdapter.UpdateWorkmatesListener {
+public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewAdapterDetailRestaurant.UpdateWorkmatesListener {
     private PlacesClient placesClient;
     private TextView name, address;
     private LinearLayout callButton, website, mLike;
-    private ImageView picRestaurant, star1, star2, star3, favoriteImageView;
-    private RecyclerView recyclerView;
+    private ImageView picRestaurant, favoriteImageView;
+    private RecyclerVIewAdapterDetailRestaurant adapter;
+    private RatingBar ratingBar;
+
     private UserViewModel userViewModel;
-    private RecyclerVIewAdapter adapter;
-    private RepositoryUser repositoryUser = new RepositoryUser();
-    private RepositoryPlaces repositoryPlaces = new RepositoryPlaces();
-    private RepositoryWorkmates repositoryWorkmates = new RepositoryWorkmates();
-    private Executor executor;
+
     private String response = null;
     private boolean checked = false, favorite = false;
-    private Lunch lunch;
-    private String restaurantName = null, restaurantType = null;
+    private String restaurantName = null, restaurantType = null, chosenAddress = null;
     private FloatingActionButton addLunchButton;
-    private User currentUser;
-    double rating;
-
+    private double rating;
+    private String favoriteAddString = "";
+    private boolean mainFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_restaurant);
-        this.configureToolbar();
+
 
         Intent intent = getIntent();
         response = intent.getStringExtra("restaurantId");
+        mainFragment = intent.getBooleanExtra("parent", true);
+
         Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
 
         Places.initialize(getApplicationContext(), BuildConfig.MAPS_API_KEY);
@@ -90,45 +90,38 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
         website = findViewById(R.id.web_buttondetail);
         picRestaurant = findViewById(R.id.imageview_pic_restaurant);
         addLunchButton = findViewById(R.id.floatingActionButton_detail);
-        adapter = new RecyclerVIewAdapter(this, this);
-        recyclerView = findViewById(R.id.recyclerview_restaurant);
-        star1 = findViewById(R.id.star1);
-        star2 = findViewById(R.id.star2);
-        star3 = findViewById(R.id.star3);
+        adapter = new RecyclerVIewAdapterDetailRestaurant(this, this);
+        RecyclerView recyclerView = findViewById(R.id.recyclerview_restaurant);
+        ratingBar = findViewById(R.id.ratingBar);
         mLike = findViewById(R.id.like_buttondetail);
         favoriteImageView = findViewById(R.id.icon_like_imageview);
 
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        userViewModel = new UserViewModel(repositoryUser, repositoryWorkmates, executor, repositoryPlaces);
-        userViewModel.getAllUsersFromRestaurant(response).observe(this, this::getAllUsers);
+        userViewModel = new UserViewModel();
+        userViewModel.getUserObject(Objects.requireNonNull(getCurrentUser()).getUid()).observe(this, this::getMyUser);
+        WorkmateViewModel workmateViewModel = new WorkmateViewModel();
+
+        workmateViewModel.getDocumentLunch(response).observe(this, this::getAllUsers);
     }
 
     private void getMyUser(User user) {
-        currentUser = user;
-        if (currentUser.getDateLunch() != null) {
-            String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-            if (currentUser.getDateLunch().get(date) != null) {
-                if (currentUser.getDateLunch().get(date).getRestaurantId() != null) {
-                    if (currentUser.getDateLunch().get(date).getRestaurantId().equals(response)) {
-                        checked = true;
-                        updateFloatingButton();
-                    }
-                }
-            }
+        if (Tool.checkIdDateRestaurantExist(user, response) ){
+            checked = true;
+            updateFloatingButton();
         }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        userViewModel.getUserObject(getCurrentUser().getUid()).observe(this, this::getMyUser);
-        userViewModel.getFavoriteList(getCurrentUser().getUid()).observe(this, this::checkFavoriteList);
+
+
     }
 
     private void checkFavoriteList(List<String> list) {
-        favorite = Tool.checkFavorite(list, response);
+        favorite = Tool.checkFavorite(list, favoriteAddString);
         updateUiFavorite();
     }
 
@@ -151,6 +144,7 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
         placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
             Place place = response.getPlace();
             final List<PhotoMetadata> metadata = place.getPhotoMetadatas();
+            assert metadata != null;
             final PhotoMetadata photoMetadata = metadata.get(0);
 
             final FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
@@ -161,9 +155,7 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
                 picRestaurant.setImageBitmap(bitmap);
             }).addOnFailureListener((exception) -> {
                 if (exception instanceof ApiException) {
-                    final ApiException apiException = (ApiException) exception;
                     Log.e("TAG", "Place not found: " + exception.getMessage());
-                    final int statusCode = apiException.getStatusCode();
                 }
             });
 
@@ -174,24 +166,26 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
             }
 
             if (0 < rating && rating < 1.6) {
-                star3.setVisibility(View.GONE);
-                star2.setVisibility(View.GONE);
+                ratingBar.setRating(1);
             } else if (rating < 3.2) {
-                star3.setVisibility(View.GONE);
-            } else if (rating == 0){
-                star3.setVisibility(View.GONE);
-                star2.setVisibility(View.GONE);
-                star1.setVisibility(View.GONE);
-            }
+                ratingBar.setRating(2);
+            } else if (rating == 0) {
+                ratingBar.setVisibility(View.GONE);
+            } else if (rating >= 3.2)
+                ratingBar.setRating(3);
 
             if (place.getName() != null)
                 name.setText(place.getName());
             if (place.getAddress() != null)
                 address.setText(place.getAddress());
 
-            restaurantName = place.getName();
+            chosenAddress = place.getAddress();
 
-            restaurantType = place.getTypes().get(0).toString();
+            restaurantName = place.getName();
+            userViewModel.getFavoriteList(Objects.requireNonNull(getCurrentUser()).getUid()).observe(this, this::checkFavoriteList);
+            favoriteAddString = this.response + "/" + restaurantName;
+
+            restaurantType = Objects.requireNonNull(place.getTypes()).get(0).toString();
             String phone;
             if (place.getPhoneNumber() != null)
                 phone = "tel:" + place.getPhoneNumber();
@@ -200,9 +194,6 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
             initListeners(phone, place.getWebsiteUri());
         }).addOnFailureListener((exception) -> {
             if (exception instanceof ApiException) {
-                ApiException apiException = (ApiException) exception;
-                int statusCode = apiException.getStatusCode();
-                // Handle error with given status code.
                 Log.e("TAG", "Place not found: " + exception.getMessage());
             }
         });
@@ -215,12 +206,12 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
                 intent.setData(Uri.parse(phoneNumber));
                 startActivity(intent);
             } else
-                Toast.makeText(this, "It seems that there is no number phone yet", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.no_number_phone), Toast.LENGTH_SHORT).show();
         });
 
         website.setOnClickListener(v -> {
-            if (websiteUri == null || websiteUri.toString() == "") {
-                Toast.makeText(this, "It seems that there is no website yet", Toast.LENGTH_SHORT).show();
+            if (websiteUri == null || websiteUri.toString().equals("")) {
+                Toast.makeText(this, getString(R.string.no_website), Toast.LENGTH_SHORT).show();
             } else {
                 Intent intentWeb = new Intent(Intent.ACTION_VIEW).setData(websiteUri);
                 startActivity(intentWeb);
@@ -231,29 +222,23 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
             if (!favorite) {
                 favorite = true;
                 updateUiFavorite();
-                userViewModel.createFavoriteList(getCurrentUser().getUid(), response);
+                userViewModel.createFavoriteList(Objects.requireNonNull(getCurrentUser()).getUid(), favoriteAddString);
+                Toast.makeText(this, getString(R.string.add_place_favorite), Toast.LENGTH_SHORT).show();
             } else {
                 favorite = false;
                 updateUiFavorite();
-                userViewModel.deleteFavoriteFromList(getCurrentUser().getUid(), response);
+                userViewModel.deleteFavoriteFromList(Objects.requireNonNull(getCurrentUser()).getUid(), favoriteAddString);
+                Toast.makeText(this, getString(R.string.delete_from_favorite), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void updateUiFavorite() {
         if (favorite) {
-            favoriteImageView.setImageResource(R.drawable.star_icons_rating);
+            favoriteImageView.setImageResource(R.drawable.favorite_true_icons);
         } else {
-            favoriteImageView.setImageResource(R.drawable.stars_icons_dark);
+            favoriteImageView.setImageResource(R.drawable.favorite_false_icons);
         }
-    }
-
-    private void configureToolbar() {
-        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar_id);
-        setSupportActionBar(toolbar);
-
-        ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
     }
 
 
@@ -262,26 +247,43 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
 
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+    }
 
     public void addRestaurantLunch(View view) {
         if (!checked) {
-            this.userViewModel.createLunch(getCurrentUser().getUid(), response, restaurantName, restaurantType);
-            userViewModel.getAllUsersFromRestaurant(response).observe(this, this::getAllUsers);
+            this.userViewModel.createLunch(Objects.requireNonNull(getCurrentUser()).getUid(), response, restaurantName, restaurantType, chosenAddress);
+
+
+            Intent intent = new Intent(DetailRestaurant.this, LunchReminder.class);
+            intent.putExtra("restaurantId", response);
+            intent.putExtra("restaurantName", restaurantName);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+
+
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            long timeNow = System.currentTimeMillis();
+
+            assert alarmManager != null;
+            alarmManager.set(AlarmManager.RTC_WAKEUP, timeNow + 7000, pendingIntent);
             checked = true;
         } else {
-            this.userViewModel.deleteLunch(getCurrentUser().getUid());
-            userViewModel.getAllUsersFromRestaurant(response).observe(this, this::getAllUsers);
+            this.userViewModel.deleteLunch(Objects.requireNonNull(getCurrentUser()).getUid());
             checked = false;
         }
         updateFloatingButton();
-
     }
 
     public void updateFloatingButton() {
-        if (checked)
+        if (checked) {
             addLunchButton.setImageResource(R.drawable.checked_restaurant_icons);
-        else
+        } else {
             addLunchButton.setImageResource(R.drawable.choose_restaurant_icons);
+        }
     }
 
 
@@ -289,4 +291,6 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
     protected FirebaseUser getCurrentUser() {
         return FirebaseAuth.getInstance().getCurrentUser();
     }
+
+
 }

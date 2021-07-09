@@ -9,5 +9,25 @@
     app:title="@string/appTitleMain"
     app:titleTextColor="@color/white">
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardview_search_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="5dp"
+        android:visibility="gone">
+
+        <AutoCompleteTextView
+            android:id="@+id/search_place_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableEnd="@drawable/search_icons"
+            android:paddingHorizontal="5dp"
+            android:backgroundTint="@color/white"
+            android:hint="@string/search_places"
+            />
+
+    </androidx.cardview.widget.CardView>
+
+
 
 </androidx.appcompat.widget.Toolbar>

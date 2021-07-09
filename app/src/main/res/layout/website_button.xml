@@ -8,15 +8,15 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/web_icons_dark"
+        android:src="@drawable/web_icons"
         android:layout_gravity="center_horizontal"
         />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorPrimaryDark"
-        android:text="WEBSITE"
+        android:textColor="@color/colorPrimary"
+        android:text="@string/website"
         android:layout_marginTop="10dp"
         android:layout_gravity="center_horizontal"/>
 

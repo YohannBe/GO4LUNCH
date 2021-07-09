@@ -1,40 +1,28 @@
-package com.example.go4lunch.ui;
+package com.example.go4lunch.recyclerview;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.go4lunch.R;
 import com.example.go4lunch.model.PlaceData;
 import com.example.go4lunch.model.User;
 import com.example.go4lunch.tool.Tool;
-import com.google.android.gms.common.api.ApiException;
+import com.example.go4lunch.ui.DetailRestaurant;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.libraries.places.api.model.PhotoMetadata;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.net.FetchPhotoRequest;
-import com.google.android.libraries.places.api.net.FetchPlaceRequest;
-import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -42,16 +30,13 @@ import java.util.Objects;
 public class RecyclerViewAdapterListRestaurant extends RecyclerView.Adapter<RecyclerViewAdapterListRestaurant.ViewHolder> {
 
 
-    private Context context;
+    private final Context context;
     private List<PlaceData> dataList = new ArrayList<>();
-    private List<String> listId = new ArrayList<>();
-    private PlacesClient placesClient;
     private LatLng myPosition;
     private List<User> mUserList;
 
-    public RecyclerViewAdapterListRestaurant(Context context, PlacesClient placesClient) {
+    public RecyclerViewAdapterListRestaurant(Context context) {
         this.context = context;
-        this.placesClient = placesClient;
     }
 
     public void updateRestaurantList(List<PlaceData> dataList, LatLng myPosition, List<User> mUserList) {
@@ -87,50 +72,48 @@ public class RecyclerViewAdapterListRestaurant extends RecyclerView.Adapter<Recy
 
         double rating;
 
-        if (dataList.get(position).getPlace().getRating() != null)
+        if (dataList.get(position).getPlace().getRating() != null) {
             rating = dataList.get(position).getPlace().getRating();
+        }
         else {
             rating = 0;
         }
 
         if (0 < rating && rating < 1.6) {
-            holder.star3.setVisibility(View.GONE);
-            holder.star2.setVisibility(View.GONE);
+            holder.ratingBar.setRating(1);
         } else if (rating < 3.2) {
-            holder.star3.setVisibility(View.GONE);
+            holder.ratingBar.setRating(2);
         } else if (rating == 0) {
-            holder.star3.setVisibility(View.GONE);
-            holder.star2.setVisibility(View.GONE);
-            holder.star1.setVisibility(View.GONE);
-        }
+            holder.ratingBar.setVisibility(View.GONE);
+        } else if (rating >=3.2)
+            holder.ratingBar.setRating(3);
 
         if (dataList.get(position).getPlace().getOpeningHours() != null) {
-            if (dataList.get(position).getPlace().getOpeningHours().getWeekdayText() != null) {
-                String day = new SimpleDateFormat("EEEE", Locale.getDefault()).format(new Date());
-                int getDay = 0;
+            Objects.requireNonNull(dataList.get(position).getPlace().getOpeningHours()).getWeekdayText();
+            String day = new SimpleDateFormat("EEEE", Locale.getDefault()).format(new Date());
+            int getDay = 0;
 
-                switch (day){
-                    case "Tuesday":
-                        getDay = 1;
-                        break;
-                    case "Wednesday":
-                        getDay = 2;
-                        break;
-                    case "Thursday":
-                        getDay = 3;
-                        break;
-                    case "Friday":
-                        getDay = 4;
-                        break;
-                    case "Saturday":
-                        getDay = 5;
-                        break;
-                    case "Sunday":
-                        getDay = 6;
-                        break;
-                }
-                holder.schedules.setText(dataList.get(position).getPlace().getOpeningHours().getWeekdayText().get(getDay));
+            switch (day){
+                case "Tuesday":
+                    getDay = 1;
+                    break;
+                case "Wednesday":
+                    getDay = 2;
+                    break;
+                case "Thursday":
+                    getDay = 3;
+                    break;
+                case "Friday":
+                    getDay = 4;
+                    break;
+                case "Saturday":
+                    getDay = 5;
+                    break;
+                case "Sunday":
+                    getDay = 6;
+                    break;
             }
+            holder.schedules.setText(Objects.requireNonNull(dataList.get(position).getPlace().getOpeningHours()).getWeekdayText().get(getDay));
         }
 
 
@@ -140,11 +123,14 @@ public class RecyclerViewAdapterListRestaurant extends RecyclerView.Adapter<Recy
 
         if (personGoingToRestaurant != 0)
             holder.persons.setText(personGoingToRestaurantString);
-        else holder.persons.setVisibility(View.INVISIBLE);
+        else {
+            holder.persons.setVisibility(View.INVISIBLE);
+        }
 
         holder.parentLayout.setOnClickListener(v -> {
             Intent intent = new Intent(context, DetailRestaurant.class);
             intent.putExtra("restaurantId", dataList.get(position).getPlace().getId());
+            intent.putExtra("parent", false);
             context.startActivity(intent);
         });
 
@@ -162,9 +148,10 @@ public class RecyclerViewAdapterListRestaurant extends RecyclerView.Adapter<Recy
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView star1, star2, star3, picture;
+        ImageView picture;
         TextView name, address, schedules, distance, persons;
         ConstraintLayout parentLayout;
+        RatingBar ratingBar;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -174,9 +161,7 @@ public class RecyclerViewAdapterListRestaurant extends RecyclerView.Adapter<Recy
             schedules = itemView.findViewById(R.id.schedules_restaurant_item);
             distance = itemView.findViewById(R.id.distance_restaurant_item);
             persons = itemView.findViewById(R.id.quantity_persons_restaurant_item);
-            star1 = itemView.findViewById(R.id.star1_restaurant_item);
-            star2 = itemView.findViewById(R.id.star2_restaurant_item);
-            star3 = itemView.findViewById(R.id.star3_restaurant_item);
+            ratingBar = itemView.findViewById(R.id.ratingBar_list);
             picture = itemView.findViewById(R.id.picture_restaurant_item_actual);
             parentLayout = itemView.findViewById(R.id.restaurant_list_recyclerview_layout);
         }

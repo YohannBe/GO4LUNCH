@@ -9,15 +9,15 @@
         android:id="@+id/icon_like_imageview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/stars_icons_dark"
+        android:src="@drawable/favorite_false_icons"
         android:layout_gravity="center_horizontal"
         />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorPrimaryDark"
-        android:text="LIKE"
+        android:textColor="@color/colorPrimary"
+        android:text="@string/like"
         android:layout_marginTop="10dp"
 
         android:layout_gravity="center_horizontal"/>
