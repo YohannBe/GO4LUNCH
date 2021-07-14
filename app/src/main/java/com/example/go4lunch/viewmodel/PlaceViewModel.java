@@ -1,27 +1,20 @@
 package com.example.go4lunch.viewmodel;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.go4lunch.model.PlaceData;
+import com.example.go4lunch.model.placeModel.ResultPlaces;
 import com.example.go4lunch.repository.RepositoryPlaces;
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
-import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.net.FetchPhotoRequest;
-import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,10 +31,10 @@ public class PlaceViewModel extends ViewModel {
         repositoryPlaces.getPlacesIds(latLng);
     }
 
-    public LiveData<List<HashMap<String, String>>> getHashMapsIds() {
+    public LiveData<List<ResultPlaces>> getHashMapsIds() {
         return repositoryPlaces.getHashMapsIds();
     }
-
+/*
     private List<PlaceData> placeFetchedListNotMutable = new ArrayList<>();
     private MutableLiveData<Boolean> tentative = new MutableLiveData<>();
     private int count;
@@ -57,16 +50,24 @@ public class PlaceViewModel extends ViewModel {
             fetchThePlace(id, placesClient, context, i);
         }
     }
-
-    public LiveData<List<PlaceData>> getFetchedPlaceList() {
+*/
+    /*public LiveData<List<PlaceData>> getFetchedPlaceList() {
         return placeFetchedList;
-    }
+    }*/
 
     public LiveData<List<AutocompletePrediction>> startSearch(String query, PlacesClient placesClient, AutocompleteSessionToken token) {
         return repositoryPlaces.startSearch(query, placesClient, token);
     }
 
+    public LiveData<List<PlaceData>> sendIdToFetchPlace(List<HashMap<String, String>> hashMaps, PlacesClient placesClient) {
+        return repositoryPlaces.sendIdToFetchPlace(hashMaps, placesClient);
+    }
 
+    public LiveData<Place> fetchThePlacePlace(String placeId, PlacesClient placesClient){
+        return repositoryPlaces.fetchThePlacePlace(placeId, placesClient);
+    }
+
+/*
         public void fetchThePlace(String placeId, PlacesClient placesClient, Context context, int i) {
 
         List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME,
@@ -108,5 +109,8 @@ public class PlaceViewModel extends ViewModel {
                 Log.e("TAG", "Place not found: " + exception.getMessage());
             }
         });
-    }
+    }*/
+
+
+
 }

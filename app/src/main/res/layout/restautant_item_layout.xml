@@ -60,7 +60,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:drawableStart="@drawable/person_user_icons"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:visibility="invisible"/>
 
         <RatingBar
             android:id="@+id/ratingBar_list"

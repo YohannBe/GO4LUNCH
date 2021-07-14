@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.Manifest;
@@ -22,10 +23,10 @@ import android.widget.Toast;
 import com.example.go4lunch.BuildConfig;
 import com.example.go4lunch.R;
 import com.example.go4lunch.model.User;
+import com.example.go4lunch.model.placeModel.ResultPlaces;
 import com.example.go4lunch.tool.Tool;
 import com.example.go4lunch.ui.DetailRestaurant;
 import com.example.go4lunch.viewmodel.PlaceViewModel;
-import com.example.go4lunch.viewmodel.UserViewModel;
 import com.example.go4lunch.viewmodel.WorkmateViewModel;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -50,7 +51,7 @@ public class MainFragment extends Fragment {
     private static GoogleMap mGoogleMap;
     private PlaceViewModel placeViewModel;
     private WorkmateViewModel workmateViewModel;
-    private List<HashMap<String, String>> places = new ArrayList<>();
+    private List<ResultPlaces> places = new ArrayList<>();
     private LatLng myLocation;
     private final float zoomLevel = 15.0f;
     private final List<User> userListWithReservation = new ArrayList<>();
@@ -120,27 +121,27 @@ public class MainFragment extends Fragment {
         int j;
         if (userListWithReservation.size() != 0) {
             for (int i = 0; i < places.size(); i++) {
-                HashMap<String, String> hashMapList = places.get(i);
+                ResultPlaces resultPlaces = places.get(i);
                 j = 0;
                 userExist = false;
                 while (j < userListWithReservation.size() && !userExist) {
-                    if (Tool.checkIdDateRestaurantExist(userListWithReservation.get(j), hashMapList.get("place_id"))) {
-                        MarkerOptions options = Tool.createMarker(hashMapList, true, getActivity());
-                        mGoogleMap.addMarker(options).setTag(hashMapList.get("place_id"));
+                    if (Tool.checkIdDateRestaurantExist(userListWithReservation.get(j), resultPlaces.getPlaceId())) {
+                        MarkerOptions options = Tool.createMarker(resultPlaces, true, getActivity());
+                        mGoogleMap.addMarker(options).setTag(resultPlaces.getPlaceId());
                         userExist = true;
                     }
                     j++;
                 }
                 if (!userExist) {
-                    MarkerOptions options = Tool.createMarker(hashMapList, false, getActivity());
-                    mGoogleMap.addMarker(options).setTag(hashMapList.get("place_id"));
+                    MarkerOptions options = Tool.createMarker(resultPlaces, false, getActivity());
+                    mGoogleMap.addMarker(options).setTag(resultPlaces.getPlaceId());
                 }
             }
         } else {
             for (int i = 0; i < places.size(); i++) {
-                HashMap<String, String> hashMapList = places.get(i);
-                MarkerOptions options = Tool.createMarker(hashMapList, false, getActivity());
-                mGoogleMap.addMarker(options).setTag(hashMapList.get("place_id"));
+                ResultPlaces resultPlaces = places.get(i);
+                MarkerOptions options = Tool.createMarker(resultPlaces, false, getActivity());
+                mGoogleMap.addMarker(options).setTag(resultPlaces.getPlaceId());
             }
         }
 
@@ -167,9 +168,9 @@ public class MainFragment extends Fragment {
         }
     }
 
-    private void getIdPlaces(List<HashMap<String, String>> hashMaps) {
+    private void getIdPlaces(List<ResultPlaces> resultPlacesList) {
         if (myLocation != null) {
-            places = hashMaps;
+            places = resultPlacesList;
             if (places.size() != 0)
                 putTheMarkers();
         }
@@ -186,7 +187,6 @@ public class MainFragment extends Fragment {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 

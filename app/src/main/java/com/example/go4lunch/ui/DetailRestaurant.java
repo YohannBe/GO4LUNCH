@@ -90,7 +90,7 @@ public class DetailRestaurant extends AppCompatActivity implements RecyclerVIewA
         website = findViewById(R.id.web_buttondetail);
         picRestaurant = findViewById(R.id.imageview_pic_restaurant);
         addLunchButton = findViewById(R.id.floatingActionButton_detail);
-        adapter = new RecyclerVIewAdapterDetailRestaurant(this, this);
+        adapter = new RecyclerVIewAdapterDetailRestaurant(this, this, getCurrentUser().getUid());
         RecyclerView recyclerView = findViewById(R.id.recyclerview_restaurant);
         ratingBar = findViewById(R.id.ratingBar);
         mLike = findViewById(R.id.like_buttondetail);

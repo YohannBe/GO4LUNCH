@@ -44,4 +44,8 @@
     <string name="we_are_eating_there_today">We are eating there today!</string>
     <string name="no_reservation_yet">no reservation yet</string>
     <string name="search_places">Search places</string>
+    <string name="no_data">No data</string>
+    <string name="closed_string">Closed</string>
+    <string name="openstring">Open</string>
+    <string name="closingsoon">Closing soon</string>
 </resources>

@@ -49,5 +49,9 @@
     <string name="we_are_eating_there_today">Nous mangeons ici aujourd\'hui !</string>
     <string name="no_reservation_yet">Pas de réservation pour le moment</string>
     <string name="search_places">Cherches une place</string>
+    <string name="no_data">Pas de données</string>
+    <string name="closed_string">Fermé</string>
+    <string name="openstring">Ouvert</string>
+    <string name="closingsoon">Ferme bientôt</string>
 
 </resources>

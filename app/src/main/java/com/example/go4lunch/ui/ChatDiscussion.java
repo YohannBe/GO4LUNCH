@@ -87,7 +87,7 @@ public class ChatDiscussion extends AppCompatActivity implements RecyclerViewAda
         secondUserPic = findViewById(R.id.seconduser_pic);
         fullName = findViewById(R.id.fullname_conversation);
         secondUser.observe(this, this:: initPicture);
-        idChat = updateListUserSort(Objects.requireNonNull(getCurrentUser()).getUid(), secondUserId);
+        idChat = Tool.updateListUserSort(Objects.requireNonNull(getCurrentUser()).getUid(), secondUserId);
         chatViewModel = new ChatViewModel();
     }
 
@@ -118,13 +118,7 @@ public class ChatDiscussion extends AppCompatActivity implements RecyclerViewAda
         else textView.setVisibility(View.GONE);
     }
 
-    public String updateListUserSort(String currentUserId, String mSecondUserId) {
-        List<String> originalList = new ArrayList<>();
-        originalList.add(currentUserId);
-        originalList.add(mSecondUserId);
-        originalList.sort(new Tool.IdAZComparator());
-        return originalList.get(0) + originalList.get(1);
-    }
+
 
 
     @Nullable

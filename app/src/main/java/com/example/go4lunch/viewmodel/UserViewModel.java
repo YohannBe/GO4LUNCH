@@ -14,14 +14,8 @@ import java.util.List;
 public class UserViewModel extends ViewModel {
 
     private final RepositoryUser repositoryUser;
-
-    private final MutableLiveData<String> restaurantIdLunch = new MutableLiveData<>();
     private final MutableLiveData<User> mUser = new MutableLiveData<>();
     private final MutableLiveData<List<String>> favoriteList = new MutableLiveData<>();
-    private final MutableLiveData<List<User>> allUsers = new MutableLiveData<>();
-    private final List<User> listUsers = new ArrayList<>();
-    private final MutableLiveData<List<String>> restaurantChosenId = new MutableLiveData<>();
-
 
     public UserViewModel() {
         this.repositoryUser = RepositoryUser.getInstance();
@@ -74,25 +68,6 @@ public class UserViewModel extends ViewModel {
         repositoryUser.deleteFavoriteFromList(uid, restaurantId);
     }
 
-    public LiveData<String> getLunchId(String uid) {
-        getUser(uid).addOnSuccessListener(documentSnapshot ->
-        {
-            User user = documentSnapshot.toObject(User.class);
-            String date = Tool.giveActualDate();
-            assert user != null;
-            if (user.getDateLunch() != null) {
-                if (user.getDateLunch().get(date) != null) {
-                    if (user.getDateLunch().get(date).getRestaurantId() != null) {
-                        restaurantIdLunch.setValue(user.getDateLunch().get(date).getRestaurantId());
-                    } else restaurantIdLunch.postValue(null);
-                } else restaurantIdLunch.postValue(null);
-            } else restaurantIdLunch.postValue(null);
-        });
-
-        return restaurantIdLunch;
-    }
-
-
     public void createFavoriteList(String uid, String restaurantId) {
         repositoryUser.createFavoriteList(uid, restaurantId);
     }
@@ -105,38 +80,5 @@ public class UserViewModel extends ViewModel {
         repositoryUser.deleteLunch(uid);
     }
 
-
-    public MutableLiveData<List<User>> getAllUsers(String uid) {
-
-        this.getUser(uid).addOnSuccessListener(documentSnapshot -> {
-            User specUser = documentSnapshot.toObject(User.class);
-            listUsers.add(specUser);
-            allUsers.setValue(listUsers);
-        });
-
-        return allUsers;
-    }
-
-    public LiveData<List<String>> getAlreadyChosenRestaurant(String uid) {
-        List<String> id = new ArrayList<>();
-        String date = Tool.giveDependingDate();
-
-        this.getUser(uid).addOnCompleteListener(task1 -> {
-            if (task1.isSuccessful()) {
-                User user = task1.getResult().toObject(User.class);
-                assert user != null;
-                if (user.getDateLunch() != null) {
-                    if (user.getDateLunch().get(date) != null) {
-                        if (user.getDateLunch().get(date).getRestaurantId() != null) {
-                            id.add(user.getDateLunch().get(date).getRestaurantId());
-                            restaurantChosenId.setValue(id);
-                        }
-                    }
-                }
-            }
-        });
-
-        return restaurantChosenId;
-    }
 
 }

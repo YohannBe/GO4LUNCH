@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -26,14 +27,16 @@ public class RecyclerVIewAdapterDetailRestaurant extends RecyclerView.Adapter<Re
 
     private final Context context;
     private List<User> userList = new ArrayList<>();
-    private final String date = Tool.giveActualDate();
+    private final String date = Tool.giveDependingDate();
+    private String userId;
 
     @NonNull
     private final UpdateWorkmatesListener updateWorkmatesListener;
 
-    public RecyclerVIewAdapterDetailRestaurant(Context context, @NonNull final UpdateWorkmatesListener updateWorkmatesListener) {
+    public RecyclerVIewAdapterDetailRestaurant(Context context, @NonNull final UpdateWorkmatesListener updateWorkmatesListener, String userId) {
         this.context = context;
         this.updateWorkmatesListener = updateWorkmatesListener;
+        this.userId = userId;
     }
 
     public void updateWorkmateList(List<User> userList) {
@@ -63,25 +66,19 @@ public class RecyclerVIewAdapterDetailRestaurant extends RecyclerView.Adapter<Re
             }
         }
         assert context != null;
-        String sentence = userList.get(position).getFirstName() + context.getString(R.string.text_no_choice_yet);
-        holder.textView.setTextColor(ContextCompat.getColor(context, R.color.text_no_choice_yet));
+        String sentence = userList.get(position).getFirstName() + " " + context.getString(R.string.text_choice_done) + " " + userList.get(position).getDateLunch().get(date).getRestaurantName();
+        holder.textView.setTextColor(ContextCompat.getColor(context, R.color.black));
 
-        if (userList.get(position).getDateLunch() != null) {
-            if (userList.get(position).getDateLunch().get(date) != null) {
-                if (userList.get(position).getDateLunch().get(date).getRestaurantName() != null) {
-                    sentence = userList.get(position).getFirstName() + " " +context.getString(R.string.text_choice_done)+ " " + userList.get(position).getDateLunch().get(date).getRestaurantName();
-                    holder.textView.setTextColor(ContextCompat.getColor(context, R.color.black));
-                }
-            }
-        }
 
         holder.textView.setText(sentence);
 
         holder.parentLayout.setOnClickListener(v ->
                 {
-                    Intent intent = new Intent(context, ChatDiscussion.class);
-                    intent.putExtra("idSecondUser", userList.get(position).getUid());
-                    context.startActivity(intent);
+                    if (!userList.get(position).getUid().equals(userId)) {
+                        Intent intent = new Intent(context, ChatDiscussion.class);
+                        intent.putExtra("idSecondUser", userList.get(position).getUid());
+                        context.startActivity(intent);
+                    } else Toast.makeText(context, "That is your own profile", Toast.LENGTH_SHORT).show();
                 }
         );
 

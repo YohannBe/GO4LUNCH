@@ -1,12 +1,15 @@
 package com.example.go4lunch.repository;
 
+
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import com.example.go4lunch.api.PlaceHelper;
+import com.example.go4lunch.model.PlaceData;
+import com.example.go4lunch.model.placeModel.ResultPlaces;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.HashMap;
@@ -43,8 +46,16 @@ public class RepositoryPlaces {
         placeHelper.initUrlMapsNearby(latLng);
     }
 
-    public LiveData<List<HashMap<String, String>>> getHashMapsIds() {
-        return PlaceHelper.ParserTask.sendListToFragment();
+    public LiveData<List<ResultPlaces>> getHashMapsIds() {
+        return placeHelper.sendListToFragment();
+    }
+
+    public LiveData<List<PlaceData>> sendIdToFetchPlace(List<HashMap<String, String>> hashMaps, PlacesClient placesClient) {
+        return placeHelper.sendIdToFetchPlace(hashMaps, placesClient);
+    }
+
+    public LiveData<Place> fetchThePlacePlace(String placeId, PlacesClient placesClient){
+        return placeHelper.fetchThePlacePlace(placeId, placesClient);
     }
 
 
